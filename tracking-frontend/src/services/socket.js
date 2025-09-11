@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:5001';
+const SOCKET_URL = 'http://localhost:5002';
 
 class SocketService {
   constructor() {
@@ -13,7 +13,17 @@ class SocketService {
     }
     return this.socket;
   }
+ busDriverLogin(busId) {
+    if (this.socket) {
+      this.socket.emit('busDriverLogin', { busId });
+    }
+  }
 
+  busDriverLogout(busId) {
+    if (this.socket) {
+      this.socket.emit('busDriverLogout', { busId });
+    }
+  }
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
