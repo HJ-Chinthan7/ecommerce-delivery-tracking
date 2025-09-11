@@ -22,8 +22,8 @@ export const BusAuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const response = await authAPI.busLogin(credentials);
     if (response.data.success) {
-      const { token, driver } = response.data;
-      setDriver(driver);
+      const { token, driver:driverObject} = response.data;
+      setDriver(driverObject);
       setToken(token);
       setIsLoggedIn(true);
       setMessage("Login successful!");

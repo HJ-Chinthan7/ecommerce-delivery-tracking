@@ -20,7 +20,10 @@ function App() {
               </BusAuthProvider>
             }
           />
-          <Route path="/driver" element={<BusDriverApp />} />
+          <Route path="/driver" element={
+             <BusAuthProvider>
+            <BusDriverApp />
+            </BusAuthProvider>} />
           <Route path="/track/:parcelId" element={<PublicTracking />} />
         </Routes>
       </div>
