@@ -31,6 +31,41 @@ class SocketService {
     }
   }
 
+  emit(event, data) {
+    if (this.socket) {
+      this.socket.emit(event, data);
+    } else {
+      console.warn("Tried to emit without socket:", event);
+    }
+  }
+
+  on(event, callback) {
+    if (this.socket) {
+      this.socket.on(event, callback);
+    }
+  }
+
+   joinAllBuses() {
+    if (this.socket) {
+      this.socket.emit('joinAllBuses');
+    }
+  }
+   updateBusLocation(data) {
+    this.socket?.emit("updateBusLocation", data);
+  }
+
+  leaveAllBuses() {
+    if (this.socket) {
+      this.socket.emit('leaveAllBuses');
+    }
+  }
+
+  off(event) {
+    if (this.socket) {
+      this.socket.off(event);
+    }
+  }
+
 
 };
 

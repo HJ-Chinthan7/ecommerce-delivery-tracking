@@ -7,14 +7,12 @@ io.on('connection', (socket) => {
     const { busId } = data;
     socket.busId = busId;
     socket.join(`bus_${busId}`);
-     socket.join('all_buses');
     console.log(`Bus driver logged in: ${busId}`);
   });
 
 socket.on('busDriverLogout', () => {
   if (socket.busId) {
     socket.leave(`bus_${socket.busId}`);
-    socket.leave('all_buses'); 
     console.log(`Bus driver logged out: ${socket.busId}`);
     delete socket.busId;
   }
@@ -26,4 +24,4 @@ socket.on('busDriverLogout', () => {
 
 };
 
-module.exports = busDriverSockets;
+module.exports= busDriverSockets;

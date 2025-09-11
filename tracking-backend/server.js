@@ -5,6 +5,7 @@ const socketIo = require('socket.io');
 const server = http.createServer(app);
 const PORT=process.env.PORT;
 const busDriverSockets = require('./sockets/busDriverSockets');
+const allBusesSockets = require('./sockets/allBusesSockets');
 
 const io = socketIo(server, {
   cors: {
@@ -14,6 +15,7 @@ const io = socketIo(server, {
 });
 
 busDriverSockets(io);
+allBusesSockets(io);
 server.listen(PORT, () => {
   console.log(`Tracking backend server running on port ${PORT}`);
 });

@@ -4,10 +4,8 @@ import { useAuth } from "../AuthContext/BusAuthContext";
 
 
 const BusDriverLogin = () => {
-  const { login } = useAuth();
+  const { login,message,setMessage } = useAuth();
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
- 
-const {message,setMessage}=useAuth()
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
