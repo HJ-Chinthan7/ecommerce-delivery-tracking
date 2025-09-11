@@ -1,6 +1,6 @@
 const Driver = require("../models/Driver");
 
-module.exports.driverLogin=async()=>{
+module.exports.driverLogin=async(req,res)=>{
     try {
     const { email, password } = req.body;
 
@@ -46,7 +46,7 @@ res.cookie('token',token);
   }
 };
 
-module.exports.driverRegister=async()=>{
+module.exports.driverRegister=async(req,res)=>{
 try{ 
 const { driverId, name, email, password, busId, routeId } = req.body;
     if (!driverId || !name || !email || !password || !busId ) {
