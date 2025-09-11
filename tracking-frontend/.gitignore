@@ -1,0 +1,7 @@
+/node_modules
+/README.md
+/eslint.config.js
+/postcss.config.js
+/tailwind.config.js
+/vite.config.js
+
