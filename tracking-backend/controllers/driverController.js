@@ -29,7 +29,7 @@ module.exports.driverLogin=async()=>{
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-
+res.cookie('token',token);
     res.json({
       success: true,
       token,
@@ -75,7 +75,8 @@ const hashpassword=await Driver.hashPassword(password);
       isActive: false
     });
     await bus.save();
-
+  
+    res.cookie('token',token);
      res.status(201).json({
       success: true,
       message: 'Driver and bus registered successfully',
