@@ -112,10 +112,8 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
   const center = busLocation || [12.9716, 77.5946];
 
   return (
-    <div className="h-[76vh] rounded-xl shadow-md flex flex-col md:flex-row">
-    
-      
-      <div className="flex-1 relative">
+    <div className="h-[100vh] md:h-[76vh] flex flex-col md:flex-row">
+      <div className="flex-1 ">
         <MapContainer center={center} zoom={18} className="h-full w-full" ref={mapRef}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -125,7 +123,10 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
      
      {(!showAll ||  Object.entries(allBuses).length==0) &&busLocation && (
             <FlyMarker position={busLocation} icon={busIcon}>
-              <Popup>My Bus</Popup>
+              <Popup>
+                My Bus<br/>
+                bus id : {driver?.busId}<br/>
+              </Popup>
             </FlyMarker>
           )}
           
@@ -144,7 +145,7 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
       </div>
 
 
-      <div className="w-full md:w-1/3 bg-white p-4 overflow-y-auto space-y-6">
+      <div className="w-full md:w-1/3 bg-white p-4 overflow-y-auto max-h-[90vh]">
      
         <div className="card">
           <h2 className="text-xl font-semibold mb-4">Location Status</h2>
