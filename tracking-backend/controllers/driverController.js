@@ -1,5 +1,6 @@
 const Driver = require("../models/Driver");
-
+const Bus=require("../models/Bus");
+const generateToken=require("../utils/generateToken")
 module.exports.driverLogin=async(req,res)=>{
     try {
     const { email, password } = req.body;
@@ -20,15 +21,11 @@ module.exports.driverLogin=async(req,res)=>{
 
    
     const bus = await Bus.findOne({ driverId: driver.driverId });
-
-    const token = jwt.sign(
-      { 
-        driverId: driver.driverId, 
-        email: driver.email
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+const driverData={ 
+  driverId: driver.driverId,
+  email: driver.email
+}
+    const token = generateToken(driverData);
 res.cookie('token',token);
     res.json({
       success: true,
@@ -75,7 +72,11 @@ const hashpassword=await Driver.hashPassword(password);
       isActive: false
     });
     await bus.save();
-  
+  const driverData={ 
+  driverId: driver.driverId,
+  email: driver.email
+}
+    const token = generateToken(driverData);
     res.cookie('token',token);
      res.status(201).json({
       success: true,

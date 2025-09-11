@@ -30,14 +30,14 @@ const driverSchema = new mongoose.Schema({
 });
 
 
-driverSchema.static.hashPassword=async function(password) {
+driverSchema.statics.hashPassword=async function(password) {
       const hashedPassword=await bcrypt.hash(password,10);
       return hashedPassword;
 };
 
 
 driverSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.passwordHash);
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('Driver', driverSchema);
