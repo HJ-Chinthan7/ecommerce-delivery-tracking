@@ -42,7 +42,7 @@ const Home = () => {
               <p className="text-gray-600 mb-4">
                 Login as a bus driver and start sharing your location for parcel tracking
               </p>
-              <Link to="/driver" className="btn-primary inline-block">
+              <Link to="/login" className="btn-primary inline-block">
                 Driver Login
               </Link>
             </div>
