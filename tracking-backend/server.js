@@ -6,10 +6,13 @@ const server = http.createServer(app);
 const PORT=process.env.PORT;
 const busDriverSockets = require('./sockets/busDriverSockets');
 const allBusesSockets = require('./sockets/allBusesSockets');
-
+const originList = [
+  process.env.FRONTEND_URL,
+  process.env.NODE_ENV !== "production" && "http://localhost:5174"
+].filter(Boolean); 
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:5174"],
+    origin:originList.length > 0 ? originList : ["http://localhost:5174"],
     methods: ["GET", "POST"]
   }
 });
