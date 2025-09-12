@@ -13,7 +13,5 @@ app.use(cors({
 app.use(express.json());
 app.use('/api/auth',authRouter);
 
-connectDb();
-  
 
   module.exports=app;
