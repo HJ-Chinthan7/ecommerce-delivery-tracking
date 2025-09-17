@@ -26,7 +26,13 @@ const driverData={
   email: driver.email
 }
     const token = generateToken(driverData);
-res.cookie('token',token);
+  
+res.cookie('token',token,   
+   { 
+  httpOnly: true,
+  secure: true,
+  maxAge: 24 * 60 * 60 * 1000,
+});
     res.json({
       success: true,
       token,
@@ -77,7 +83,11 @@ const hashpassword=await Driver.hashPassword(password);
   email: driver.email
 }
     const token = generateToken(driverData);
-    res.cookie('token',token);
+    res.cookie('token',token,{ 
+  httpOnly: true,
+  secure: true,
+  maxAge: 24 * 60 * 60 * 1000,
+});
      res.status(201).json({
       success: true,
       message: 'Driver and bus registered successfully',
@@ -97,6 +107,18 @@ const hashpassword=await Driver.hashPassword(password);
     res.status(500).json({ error: 'Internal server error'+err });
 }
 
+};
+
+module.exports.driverLogout = async (req, res) => {
+    try {
+        const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) return res.status(400).json({ success: false, message: 'No token found' });
+        res.clearCookie('token');
+        res.json({ success: true, message: 'Logged out successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
 };
 
   

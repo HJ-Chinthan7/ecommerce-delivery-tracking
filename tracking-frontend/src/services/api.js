@@ -6,6 +6,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  
 });
 
 
@@ -20,4 +21,5 @@ api.interceptors.request.use((config) => {
 export const authAPI = {
   busLogin: (credentials) => api.post('/auth/busLogin', credentials),
   registerDriver: (driverData) => api.post('/auth/registerDriver', driverData),
+  driverLogout: () => api.post('/auth/driverLogout')
 };

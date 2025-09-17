@@ -40,14 +40,27 @@ export const BusAuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setDriver(null);
-    setToken(null);
-    localStorage.clear();
-    if (!socketService.connected) {
-      socketService.connect();
+  const logout = async() => {
+  
+      socketService.disconnect();
       socketService.busDriverLogout(driver.busId);
+    if (!socketService.connected) {
+     //see here i need to disconnect socket when logout i have done in the above without checking if it is connected or not i have to see the socket.connteced implemtation 
     } 
+   const response=await authAPI.driverLogout();
+    if(response.data.success){
+      setMessage("Logged out successfully");
+        setDriver(null);
+    setToken(null);
+      setIsLoggedIn(false);
+    localStorage.clear();
+    navigate("/login");
+    }
+    else{
+      setMessage("Logout failed. Please try again.");
+    }
+
+
   };
 
   return (

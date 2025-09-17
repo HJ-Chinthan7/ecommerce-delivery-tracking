@@ -18,4 +18,7 @@ body("driverId").notEmpty().withMessage("Driver ID is required"),
 body("busId").notEmpty().withMessage("Bus ID is required"),
 ],driverController.driverRegister);
 
+router.post('/driverLogout',authenticateToken,driverController.driverLogout);
+
+
 module.exports = router;
