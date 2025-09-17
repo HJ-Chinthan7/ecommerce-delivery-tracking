@@ -1,8 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const authRouter=require('./routes/auth');
 const app = express();
+
 connectDb=require("./database/db")
 const appOrigin=process.env.FRONTEND_URL||"http://localhost:5174"
 app.use(cors({
@@ -11,6 +13,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use('/api/auth',authRouter);
 
 
