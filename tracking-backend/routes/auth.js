@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const Driver = require('../models/Driver');
 const Bus = require('../models/Bus');
+const { authenticateToken } = require('../middleware/auth.middleware');
 const driverController=require("../controllers/driverController");
 const {body}=require('express-validator');
 const router = express.Router();
