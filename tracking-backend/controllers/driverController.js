@@ -1,6 +1,7 @@
 const Driver = require("../models/Driver");
 const Bus=require("../models/Bus");
 const generateToken=require("../utils/generateToken")
+const { validationResult } = require('express-validator');
 module.exports.driverLogin=async(req,res)=>{
     try {
     const { email, password } = req.body;
@@ -51,6 +52,10 @@ res.cookie('token',token,
 
 module.exports.driverRegister=async(req,res)=>{
 try{ 
+const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 const { driverId, name, email, password, busId, routeId } = req.body;
     if (!driverId || !name || !email || !password || !busId ) {
       return res.status(400).json({ error: 'All fields are required' });

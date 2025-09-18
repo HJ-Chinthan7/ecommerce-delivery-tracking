@@ -27,7 +27,7 @@ const Home = () => {
               <p className="text-gray-600 mb-4">
                 Manage parcels, assign them to buses, and monitor the delivery system
               </p>
-              <Link to="/admin" className="btn-primary inline-block">
+              <Link to="/admin/login" className="btn-primary inline-block">
                 Access Admin Panel
               </Link>
             </div>

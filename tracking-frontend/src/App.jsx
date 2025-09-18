@@ -5,6 +5,8 @@ import PublicTracking from "./components/PublicTracking";
 import Home from "./components/Home";
 import { BusAuthProvider } from "./AuthContext/BusAuthContext";
 import BusDriverLogin from "./components/BusDriverLogin";
+import AdminLogin from "./components/AdminLogin";
+import { AdminAuthProvider } from "./AuthContext/AdminAuthContext";
 function App() {
   return (
     <Router>
@@ -12,6 +14,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin/login" element={
+            <AdminAuthProvider>
+            <AdminLogin/>
+            </AdminAuthProvider>
+          }/>
           <Route
             path="/login"
             element={

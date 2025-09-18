@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5002/api'; //import.meta.env.VITE_APP_BASE_URL||
+const API_BASE_URL ='http://localhost:5002/api'; //  import.meta.env.VITE_APP_BASE_URL||
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -22,4 +22,10 @@ export const authAPI = {
   busLogin: (credentials) => api.post('/auth/busLogin', credentials),
   registerDriver: (driverData) => api.post('/auth/registerDriver', driverData),
   driverLogout: () => api.post('/auth/driverLogout')
+};
+
+export const adminAPI = {
+  adminLogin: (credentials) => api.post('/auth/adminLogin', credentials),
+  registerAdmin: (adminData) => api.post('/auth/registerAdmin', adminData),
+  adminLogout: () => api.post('/auth/adminLogout')
 };

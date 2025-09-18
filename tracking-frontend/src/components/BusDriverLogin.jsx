@@ -1,10 +1,11 @@
 
 import { useState } from "react";
 import { useAuth } from "../AuthContext/BusAuthContext";
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const BusDriverLogin = () => {
   const { login,message,setMessage } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -14,6 +15,10 @@ const BusDriverLogin = () => {
         setMessage("Login failed. Please check your credentials."+err.message);
     }
   };
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    setShowPassword(!showPassword);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -52,24 +57,33 @@ const BusDriverLogin = () => {
             </div>
             <div>
               <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
               >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="input-field mt-1"
-                placeholder="Enter your password"
-                value={loginForm.password}
-                onChange={(e) =>
-                  setLoginForm({ ...loginForm, password: e.target.value })
-                }
-              />
+                 <div className="relative mt-1">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      className="input-field w-full pr-10"
+                      placeholder={"Enter your password"}
+                      value={loginForm.password}
+                      onChange={(e) =>
+                      setLoginForm({ ...loginForm, password: e.target.value })
+                      }
+                      />
+                      <span
+                      className="absolute right-3 top-1/2 -translate-y-1/2 transform cursor-pointer text-gray-400 hover:text-gray-600"
+                      onClick={togglePasswordVisibility}
+                      >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                       </span>
+                  </div>
+                           
             </div>
+           
           </div>
 
         
@@ -99,3 +113,4 @@ const BusDriverLogin = () => {
 
 export default BusDriverLogin;
 
+                         

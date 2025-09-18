@@ -40,7 +40,9 @@ const busIcon = new L.Icon({
 const FlyMarker = ({ position, icon, children }) => {
   const map = useMap();
   useEffect(() => {
-    if (position) map.flyTo(position, map.getZoom(), { duration: 0.5 });
+    if (position) map.flyTo(position, map.getZoom(), { duration: 1,
+  easeLinearity: 0.1
+});
   }, [position, map]);
 
   return <Marker position={position} icon={icon}>{children}</Marker>;

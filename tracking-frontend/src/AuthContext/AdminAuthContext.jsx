@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "../services/api";
+import { adminAPI, authAPI } from "../services/api";
 import { useNavigate } from "react-router-dom";
 const AdminAuthContext = createContext();
 
@@ -12,47 +12,48 @@ export const AdminAuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token && !admin) {
-      const savedAdmin = localStorage.getItem("driver");
+      const savedAdmin = localStorage.getItem("admin");
       if (savedAdmin) admin(JSON.parse(savedAdmin));
     }
   }, [token]);
 
-  const login = async (credentials) => {
-    const response = await authAPI.busLogin(credentials);
-    if (response.data.success) {
-      const { token, driver} = response.data;
-      setAdmin(driver);
-      setToken(token);
-      setIsLoggedIn(true);
-      setMessage("Admin Login successful!");
-      navigate("/driver");
-      localStorage.setItem("token", token);
-      localStorage.setItem("driver", JSON.stringify(admin));
-  };
+ 
 
-  const logout = async() => {
-   const response=await authAPI.driverLogout();
-    if(response.data.success){
-      setMessage("Logged out successfully");
+    const logout = async() => {
+    const response=await adminAPI.adminLogout();
+        if(response.data.success){
+        setMessage("Logged out successfully");
         setAdmin(null);
-    setToken(null);
-      setIsLoggedIn(false);
-    localStorage.clear();
-    navigate("/login");
-    }
-    else{
-      setMessage("Logout failed. Please try again.");
-    }
+        setToken(null);
+        setIsLoggedIn(false);
+        localStorage.clear();
+        navigate("/admin/login");
+        }
+        else{
+        setMessage("Logout failed. Please try again.");
+        }
 
 
-  };
-
-  return (
+    };
+    const login = async (credentials) => {
+        const response = await adminAPI.adminLogin(credentials);
+        if (response.data.success) {
+        const { token, admin} = response.data;
+        setAdmin(admin);
+        setToken(token);
+        setIsLoggedIn(true);
+        setMessage("Admin Login successful!");
+        navigate("/adminpanel");
+        localStorage.setItem("token", token);
+        localStorage.setItem("admin", JSON.stringify(admin));
+    };
+    
+    };
+ return (
     <AdminAuthContext.Provider value={{ admin,message,setMessage,isLoggedIn, token, login, logout }}>
       {children}
     </AdminAuthContext.Provider>
   );
-};
 }
 
 

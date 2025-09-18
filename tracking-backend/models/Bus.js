@@ -1,36 +1,44 @@
 const mongoose = require('mongoose');
-
 const busSchema = new mongoose.Schema({
   busId: {
-    type: String,
-    required: true,
-    unique: true
-  },
+     type: String,
+      required: true,
+       unique: true 
+      },
   driverId: {
-    type: String,
+     type: mongoose.Schema.Types.ObjectId,
+     ref: "Driver" 
+    },
+  routeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Route"
+  },
+  regionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Region",
     required: true
   },
-  routeId: {
-    type: String,
+  adminId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Admin",
     required: true
   },
   parcels: [{
-    type: String,
-    ref: 'Parcel'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Parcel"
   }],
   currentLocation: {
-    lat: {
-      type: Number,
-      required: true
-    },
-    lon: {
-      type: Number,
-      required: true
-    }
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true }
   },
   isActive: {
     type: Boolean,
     default: false
+  },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending"
   },
   currentBusStop: {
     stopId: {
@@ -52,8 +60,6 @@ const busSchema = new mongoose.Schema({
       default: null
     }
   }
-}, {
-  timestamps: true
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model('Bus', busSchema);
+module.exports = mongoose.model("Bus", busSchema);

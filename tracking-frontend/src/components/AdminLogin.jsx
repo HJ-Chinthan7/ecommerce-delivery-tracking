@@ -1,0 +1,113 @@
+
+import { useState } from "react";
+import { useAdminAuth } from "../AuthContext/AdminAuthContext";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+const AdminLogin = () => {
+const [showPassword, setShowPassword] = useState(false);
+  const { login,message,setMessage } = useAdminAuth();
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await login(loginForm);
+    } catch (err) {
+        setMessage("Login failed. Please check your credentials."+err.message);
+    }
+  };
+
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    setShowPassword(!showPassword);
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="max-w-md w-full space-y-8">
+     
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+           Admin Login
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to manage bus drivers and routes
+          </p>
+        </div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="input-field mt-1"
+                placeholder="Enter your email"
+                value={loginForm.email}
+                onChange={(e) =>
+                  setLoginForm({ ...loginForm, email: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+
+                 <div className="relative mt-1">
+                <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    className="input-field w-full pr-10"
+                    placeholder={"Enter your password"}
+                    value={loginForm.password}
+                    onChange={(e) =>
+                      setLoginForm({ ...loginForm, password: e.target.value })
+                        }
+                />
+                <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 transform cursor-pointer text-gray-400 hover:text-gray-600"
+                    onClick={togglePasswordVisibility}
+                >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+                </div>
+            </div>
+          {message && (
+            <div
+              className={`p-3 rounded-md ${
+                message.includes("successful")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {message}
+            </div>
+          )}
+
+          <div>
+            <button type="submit" className="btn-primary w-full">
+              Sign in
+            </button>
+          </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  );
+};
+
+export default AdminLogin;
+
