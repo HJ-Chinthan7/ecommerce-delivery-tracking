@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:5002'; //import.meta.env.VITE_APP_SOCKET_URL||
+const SOCKET_URL = import.meta.env.VITE_APP_SOCKET_URL||'http://localhost:5002'; //
 class SocketService {
   constructor() {
     this.socket = null;

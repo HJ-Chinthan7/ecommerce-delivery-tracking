@@ -13,7 +13,7 @@ const originList = [
 ].filter(Boolean); 
 const io = socketIo(server, {
   cors: {
-    origin:"http://localhost:5174",//originList.length > 0 ? originList : ["http://localhost:5174"],  //"https://bucolic-daifuku-29a495.netlify.app",
+    origin:originList.length > 0 ? originList : ["https://bucolic-daifuku-29a495.netlify.app","http://localhost:5174"],  //, "http://localhost:5174",//
     methods: ["GET", "POST"]
   }
 });
