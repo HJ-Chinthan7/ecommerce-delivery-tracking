@@ -151,7 +151,6 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
 
 
       <div className="w-full md:w-1/3 bg-white p-4 overflow-y-auto max-h-[90vh]">
-     
         <div className="card">
           <h2 className="text-xl font-semibold mb-4">Location Status</h2>
           {(busLocation||location) ? (

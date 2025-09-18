@@ -21,9 +21,9 @@ const BusDriverApp = () => {
       setMessage("Geolocation not supported by this browser");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+
         setLocation({
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
