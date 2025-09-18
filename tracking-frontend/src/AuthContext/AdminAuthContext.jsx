@@ -36,14 +36,14 @@ export const AdminAuthProvider = ({ children }) => {
 
     };
     const login = async (credentials) => {
-        const response = await adminAPI.adminLogin(credentials);
+        const {role}=credentials;
+         const response =(role)===('superadmin')? await adminAPI.superAdminLogin(credentials):await adminAPI.adminLogin(credentials);
         if (response.data.success) {
         const { token, admin} = response.data;
         setAdmin(admin);
         setToken(token);
         setIsLoggedIn(true);
-        setMessage("Admin Login successful!");
-        navigate("/adminpanel");
+        setMessage(`${role} Login successful!`);
         localStorage.setItem("token", token);
         localStorage.setItem("admin", JSON.stringify(admin));
     };
