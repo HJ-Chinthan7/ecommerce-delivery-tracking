@@ -48,7 +48,7 @@ const FlyMarker = ({ position, icon, children }) => {
 
 const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
   const { driver, location } = useAuth();
-  const [busLocation, setBusLocation] = useState(location || null);
+  const [busLocation, setBusLocation] = useState(location||null);
   const [allBuses, setAllBuses] = useState({});
   const mapRef = useRef();
 
@@ -64,9 +64,14 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
             lat: loc[0],
             lon: loc[1],
           });
-        });
+        },      (err) => {
+        console.error("Error getting location:", err);
+       
+      },{ enableHighAccuracy: true,
+          timeout: 10000,
+         maximumAge: 0  });
       }
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [tracking, driver]);
@@ -149,13 +154,13 @@ const BusMap = ({tracking,setTracking,showAll,setShowAll}) => {
      
         <div className="card">
           <h2 className="text-xl font-semibold mb-4">Location Status</h2>
-          {busLocation ? (
+          {(busLocation||location) ? (
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span>Current Location:</span>
-                <span className="mr-5">
-                  {(busLocation[0]?.toFixed(2)||busLocation?.lat?.toFixed(2))}, {(busLocation[1]?.toFixed(2)||busLocation?.lat?.toFixed(2))}
-                </span>
+               {busLocation&& <span className="mr-5">
+                  {((busLocation[0]?.toFixed(2))||(busLocation?.lat?.toFixed(2)))} ,{((busLocation[1]?.toFixed(2))||(busLocation?.lat?.toFixed(2)))}
+                </span>}
               </div>
               <div className="flex justify-between">
                 <span>Tracking Status:</span>

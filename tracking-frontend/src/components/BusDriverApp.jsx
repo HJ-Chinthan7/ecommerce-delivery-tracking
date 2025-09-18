@@ -6,6 +6,7 @@ import Tabs from "./Tabs";
 import BusMap from "./BusMap";
 import RouteInfo from "./RouteInfo";
 import DeliveriesTable from "./DeliveriesTable";
+
 const BusDriverApp = () => {
   const { driver, logout ,setLocation} = useAuth();
   const {message,setMessage}=useState("")
@@ -31,12 +32,15 @@ const BusDriverApp = () => {
       (err) => {
         console.error("Error getting location:", err);
         setMessage("Unable to get your location. Please enable location services.");
+      },
+      { enableHighAccuracy: true,
+         timeout: 10000,
+        maximumAge: 0 
       }
     );
-  }, [driver]);
+  }, []);
 
   if (!driver) return <BusDriverLogin />;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar activeTab={activeTab} logout={logout} />
