@@ -11,9 +11,9 @@ const regionSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  adminId: {
+  superadminId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin",
+    ref: "SuperAdmin",
     required: true
   }
 }, { timestamps: true });

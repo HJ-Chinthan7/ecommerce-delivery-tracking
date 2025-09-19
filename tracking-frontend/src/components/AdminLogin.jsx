@@ -1,4 +1,3 @@
-
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAdminAuth } from "../AuthContext/AdminAuthContext";
 import { useState } from 'react';
@@ -19,19 +18,19 @@ function AdminLogin() {
     setMessage('');
 
     try {
-      const result = await login(email, password, role);
-      
+
+      const result = await login({email, password, role});
       if (result.success) {
-        if (result.role === 'superadmin') {
-          navigate('/superadmin-dashboard');
+        if (result?.admin?.role === 'superadmin') {
+          navigate('/admin/login/superadmin-dashboard');
         } else {
-          navigate('/admin-dashboard');
+          navigate('/admin/login/admin-dashboard');
         }
       } else {
         setMessage(result.error);
       }
-    } catch (err) {
-      setMessage('Login failed. Please try again.');
+    } catch (error) {
+      setMessage('Login failed. Please try again.'+error.message);
     } finally {
       setLoading(false);
     }

@@ -20,8 +20,8 @@ module.exports.driverLogin=async(req,res)=>{
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-   
-    const bus = await Bus.findOne({ driverId: driver.driverId });
+    const bus = await Bus.findOne({ _id: driver.busId });
+    console.log("Bus found:", bus);
 const driverData={ 
   driverId: driver.driverId,
   email: driver.email
@@ -50,69 +50,88 @@ res.cookie('token',token,
   }
 };
 
-module.exports.driverRegister=async(req,res)=>{
-try{ 
-const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-const { driverId, name, email, password, busId, routeId } = req.body;
-    if (!driverId || !name || !email || !password || !busId ) {
-      return res.status(400).json({ error: 'All fields are required' });
+module.exports.driverRegister = async (req, res) => {
+  try {
+   
+    const errors = validationResult(req);
+    console.log("Validation errors:", errors.array());
+    console.log("Request body:", req.body);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-const existingDriver = await Driver.findOne({ 
-      $or: [{ email }, { driverId }] 
-    });
-  if (existingDriver) {
-      return res.status(400).json({ error: 'Driver already exists' });
+
+    const { driverId, name, email, password, busId, adminId, regionId,status } = req.body;
+
+    if (!driverId || !name || !email || !password || !adminId || !regionId) {
+      return res.status(400).json({ error: "All required fields must be filled" });
     }
-const hashpassword=await Driver.hashPassword(password);
+
+    const existingDriver = await Driver.findOne({ $or: [{ email }, { driverId }] });
+    if (existingDriver) {
+      return res.status(400).json({ error: "Driver already exists" });
+    }
+
+   
+    const hashedPassword = await Driver.hashPassword(password);
+
+   
     const driver = new Driver({
       driverId,
       name,
       email,
-      password: hashpassword
+      status,
+      password: hashedPassword,
+      adminId,
+      regionId,
+      busId: busId || null
     });
- await driver.save();
-    const bus = new Bus({
-      busId,
-      driverId,
-      routeId,
-      parcels: [],
-      currentLocation: { lat: 0, lon: 0 },
-      isActive: false
-    });
-    await bus.save();
-  const driverData={ 
-  driverId: driver.driverId,
-  email: driver.email
-}
-    const token = generateToken(driverData);
-    res.cookie('token',token,{ 
-  httpOnly: true,
-  secure: true,
-  maxAge: 24 * 60 * 60 * 1000,
-});
-     res.status(201).json({
-      success: true,
-      message: 'Driver and bus registered successfully',
-      driver: {
-        driverId: driver.driverId,
-        name: driver.name,
-        email: driver.email
-      },
-      bus: {
-        busId: bus.busId,
-        routeId: bus.routeId
+
+    await driver.save();
+
+    let globalbus=null;
+    if (busId) {
+      const bus = await Bus.findById(busId);
+      if (!bus) {
+        return res.status(404).json({ error: 'Bus not found' });
       }
+
+      if (bus.driverId) {
+        return res.status(400).json({ error: 'Bus is already assigned to another driver' });
+      }
+
+      bus.driverId = driver._id;
+      await bus.save();
+      globalbus=bus;
+    }
+
+    const driverData = { driverId: driver.driverId, email: driver.email, _id: driver._id };
+    const token = generateToken(driverData);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000
     });
 
-}catch(err){
- console.error('Registration error:', err);
-    res.status(500).json({ error: 'Internal server error'+err });
-}
-
+    res.status(201).json({
+      success: true,
+      message: "Driver registered successfully",
+      driver:{
+    driverId: driver.driverId,
+    name: driver.name,
+    email: driver.email,
+    status: driver.status,
+    busId: globalbus?.busId || null,
+    routeId: globalbus?.routeId || null,
+    busStatus: globalbus?.status || null
+  },
+    });
+  } catch (err) {
+    console.error("Driver registration error:", err);
+    res.status(500).json({ error: "Internal server error: " + err.message });
+  }
 };
+
 
 module.exports.driverLogout = async (req, res) => {
     try {

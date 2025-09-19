@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL ='http://localhost:5002/api'; //  import.meta.env.VITE_APP_BASE_URL||
+const API_BASE_URL =import.meta.env.VITE_APP_BASE_URL||'http://localhost:5002/api'; //  
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -25,7 +25,9 @@ export const authAPI = {
 };
 
 export const adminAPI = {
-  adminLogin: (credentials) => api.post('/auth/adminLogin', credentials),
-  registerAdmin: (adminData) => api.post('/auth/registerAdmin', adminData),
-  adminLogout: () => api.post('/auth/adminLogout')
+  superAdminLogin: (credentials) => api.post('/superadmin/superAdminLogin', credentials),
+  adminLogin: (credentials) => api.post('/admin/adminLogin', credentials),
+  registerAdmin: (adminData) => api.post('/superadmin/registerAdmin', adminData),
+  adminLogout: () => api.post('/auth/adminLogout'),
+  superAdminLogout: () => api.post('/superadmin/superAdminLogout')
 };

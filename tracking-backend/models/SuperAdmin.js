@@ -22,7 +22,11 @@ const superAdminSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 superAdminSchema.statics.hashPassword = async function(password) {
-  return await bcrypt.hash(password, 10);
+  
+    const response= await bcrypt.hash(password, 10);
+    console.log("hashed password:",response);
+    return response;
+
 };
 
 superAdminSchema.methods.comparePassword = async function(candidatePassword) {

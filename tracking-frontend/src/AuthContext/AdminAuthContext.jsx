@@ -13,7 +13,7 @@ export const AdminAuthProvider = ({ children }) => {
   useEffect(() => {
     if (token && !admin) {
       const savedAdmin = localStorage.getItem("admin");
-      if (savedAdmin) admin(JSON.parse(savedAdmin));
+      if (savedAdmin) setAdmin(JSON.parse(savedAdmin));
     }
   }, [token]);
 
@@ -37,7 +37,9 @@ export const AdminAuthProvider = ({ children }) => {
     };
     const login = async (credentials) => {
         const {role}=credentials;
-         const response =(role)===('superadmin')? await adminAPI.superAdminLogin(credentials):await adminAPI.adminLogin(credentials);
+        console.log("role in auth context:",role);
+     try {
+         const response =role==="superadmin"? await adminAPI.superAdminLogin(credentials):await adminAPI.adminLogin(credentials);
         if (response.data.success) {
         const { token, admin} = response.data;
         setAdmin(admin);
@@ -46,8 +48,15 @@ export const AdminAuthProvider = ({ children }) => {
         setMessage(`${role} Login successful!`);
         localStorage.setItem("token", token);
         localStorage.setItem("admin", JSON.stringify(admin));
+        return response.data;
+        }
+    }catch (error) {
+             if (error.response) {
+              return error.response.data;   
+            } else {
+                 return { success: false, error: "Network error" };
+          }
     };
-    
     };
  return (
     <AdminAuthContext.Provider value={{ admin,message,setMessage,isLoggedIn, token, login, logout }}>

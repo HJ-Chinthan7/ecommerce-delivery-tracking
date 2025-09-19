@@ -7,11 +7,13 @@ const busSchema = new mongoose.Schema({
       },
   driverId: {
      type: mongoose.Schema.Types.ObjectId,
-     ref: "Driver" 
+     ref: "Driver",
+     default: null 
     },
   routeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Route"
+    ref: "Route",
+    default: null 
   },
   regionId: {
     type: mongoose.Schema.Types.ObjectId,
