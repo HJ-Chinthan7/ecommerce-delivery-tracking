@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminLogin from "../components/AdminLogin";
-import SuperAdminDashboard from "../components/SuperAdminDashboard";
+import AdminLogin from "../components/admins/AdminLogin";
+import SuperAdminDashboard from "../components/admins/SuperAdminDashboard";
 const AdminRoutes=()=> {
   return (
     <Routes>

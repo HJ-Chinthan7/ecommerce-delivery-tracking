@@ -13,7 +13,7 @@ const originList = [
 ].filter(Boolean); 
 const io = socketIo(server, {
   cors: {
-    origin:"https://real-time-trackingofbuses.netlify.app",//originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app","http://localhost:5174"], 
+    origin:"http://localhost:5174",//originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app","http://localhost:5174"],//"https://real-time-trackingofbuses.netlify.app",
     methods: ["GET", "POST"]
   }
 });

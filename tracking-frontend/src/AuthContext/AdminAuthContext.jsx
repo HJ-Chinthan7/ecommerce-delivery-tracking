@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { adminAPI, authAPI } from "../services/api";
+import { adminAPI } from "../services/api";
 import { useNavigate } from "react-router-dom";
 const AdminAuthContext = createContext();
 
@@ -32,9 +32,23 @@ export const AdminAuthProvider = ({ children }) => {
         else{
         setMessage("Logout failed. Please try again.");
         }
+      };
 
-
+ const superAdminLogout = async() => {
+    const response=await adminAPI.superAdminLogout();
+        if(response.data.success){
+        setMessage("Logged out successfully");
+        setAdmin(null);
+        setToken(null);
+        setIsLoggedIn(false);
+        localStorage.clear();
+        navigate("/admin/login");
+        }
+        else{
+        setMessage("Logout failed. Please try again.");
+        }
     };
+
     const login = async (credentials) => {
         const {role}=credentials;
         console.log("role in auth context:",role);
@@ -59,7 +73,7 @@ export const AdminAuthProvider = ({ children }) => {
     };
     };
  return (
-    <AdminAuthContext.Provider value={{ admin,message,setMessage,isLoggedIn, token, login, logout }}>
+    <AdminAuthContext.Provider value={{ admin,message,setMessage,isLoggedIn, token, login, logout,superAdminLogout }}>
       {children}
     </AdminAuthContext.Provider>
   );

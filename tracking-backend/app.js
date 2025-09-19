@@ -7,7 +7,7 @@ const superAdminRouter=require('./routes/superAdmin');
 const app = express();
 
 connectDb=require("./database/db")
-const appOrigin= process.env.FRONTEND_URL||"http://localhost:5174"// 
+const appOrigin= "http://localhost:5174"// process.env.FRONTEND_URL||
 app.use(cors({
   origin: appOrigin,
   methods: ["GET", "POST", "PUT", "DELETE"],

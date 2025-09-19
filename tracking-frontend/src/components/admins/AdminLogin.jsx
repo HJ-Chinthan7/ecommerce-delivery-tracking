@@ -1,5 +1,5 @@
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useAdminAuth } from "../AuthContext/AdminAuthContext";
+import { useAdminAuth } from "../../AuthContext/AdminAuthContext";
 import { useState } from 'react';
 import { useNavigate ,Link} from 'react-router-dom';
 

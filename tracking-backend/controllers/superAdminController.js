@@ -1,14 +1,12 @@
-
-
-const Region = require("../models/Region");
-const { validationResult } =require('express-validator');
+const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const SuperAdmin = require("../models/SuperAdmin");
 const Admin = require("../models/Admin");
 const Bus = require('../models/Bus');
-
-module.exports.superAdminLogin =  async (req, res) => {
-    const errors = validationResult(req);
+const Driver=require("../models/Driver")
+const Region = require("../models/Region");
+module.exports.superAdminLogin = async (req, res) => {
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
@@ -25,34 +23,34 @@ module.exports.superAdminLogin =  async (req, res) => {
     if (role === 'superadmin') {
       user = await SuperAdmin.findOne({ email });
       userType = 'superadmin';
-      console.log("superadmin user:",user);
+      console.log("superadmin user:", user);
     }
-    else  {
+    else {
       return res.status(400).json({ error: 'Insufficient Permission' });
     }
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
-    }    
+    }
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email, 
+      {
+        userId: user._id,
+        email: user.email,
         role: userType
       },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-res.cookie('token',token,{
-    secure:true,
-    httpOnly:true,
-    maxAge:24*60*60*1000
-});
+    res.cookie('token', token, {
+      secure: true,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
+    });
     res.json({
       success: true,
       token,
@@ -73,17 +71,22 @@ res.cookie('token',token,{
 
 module.exports.createRegion = async (req, res) => {
   try {
-    const { name, code, superadminId } = req.body;
+    const { name, code, superAdminEmail } = req.body;
 
     const existingRegion = await Region.findOne({ $or: [{ name }, { code }] });
     if (existingRegion) {
       return res.status(400).json({ success: false, error: "Region name or code already exists" });
     }
+const superAdmin=await SuperAdmin.findOne({email:superAdminEmail}).select('_id');
+
+if(!superAdmin){
+res.status(400).json({success:false,error:"super admin error"});
+}
 
     const newRegion = new Region({
       name,
       code,
-      superadminId
+      superadminId:superAdmin._id
     });
 
     await newRegion.save();
@@ -108,7 +111,7 @@ exports.createAdmin = async (req, res) => {
 
     const hashedPassword = await Admin.hashPassword(password);
 
-    
+
     const newAdmin = new Admin({
       name,
       email,
@@ -133,9 +136,9 @@ module.exports.createBus = async (req, res) => {
     //   return res.status(400).json({ errors: errors.array() });
     // }
 
-    const { busId, regionId, adminId,routeId } = req.body;
+    const { busId, regionId, adminId, routeId } = req.body;
 
-    if (!busId ||  !regionId || !adminId) {
+    if (!busId || !regionId || !adminId) {
       return res.status(400).json({ error: 'All required fields must be provided' });
     }
 
@@ -146,14 +149,14 @@ module.exports.createBus = async (req, res) => {
 
     const bus = new Bus({
       busId,
-      routeId,
+      routeId:null,
       regionId,
       adminId,
-      driverId: null, 
+      driverId: null,
       parcels: [],
       currentLocation: { lat: 0, lng: 0 },
       isActive: true,
-      status: 'approved', 
+      status: 'approved',
       currentBusStop: { stopId: null, name: null },
       nextBusStop: { stopId: null, name: null }
     });
@@ -171,3 +174,56 @@ module.exports.createBus = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+module.exports.getAllAdmins = async (req, res) => {
+  try {
+    const admins = await Admin.find().select('-password').populate('regionId','name code');
+    res.json({ success: true,  admins });
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+}
+
+module.exports.getAllRegions = async (req, res) => {
+  try {
+    const regions = await Region.find().select("-superadminId");
+    res.status(200).json({success:true,regions});
+  } catch (error) {
+    console.error("Error fetching regions:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+module.exports.superAdminLogout = async (req, res) => {
+  try {
+    res.clearCookie('token');
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during logout:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+module.exports.getAllBuses = async (req, res) => {
+  try{
+    const buses=await Bus.find().populate('regionId','name code').populate('adminId','name email').populate('driverId','name email');
+    res.json({success:true,buses});
+  }catch(error){
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+module.exports.getAllDrivers=async(req,res)=>{
+  try{
+    const drivers=await Driver.find().populate('regionId','name code').populate('adminId','name email').populate('busId','busId');
+    res.json({success:true,drivers});
+  }catch(error){
+res.status(500).json({success:false,error:"Server error" });
+  }
+};
+
+module.exports.approveDriver=async(req,res)=>{
+
+}
