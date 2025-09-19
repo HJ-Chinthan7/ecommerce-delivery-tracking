@@ -20,7 +20,7 @@ router.get("/getalladmins", superAdminController.getAllAdmins);
 router.get("/getallregions", superAdminController.getAllRegions);
 router.get("/getallbuses", superAdminController.getAllBuses);
 router.get("/getalldrivers", superAdminController.getAllDrivers);
-router.post("/superAdmninLogout", superAdminController.superAdminLogout);
+router.post("/superAdminLogout", superAdminController.superAdminLogout);
 
 module.exports=router;
 

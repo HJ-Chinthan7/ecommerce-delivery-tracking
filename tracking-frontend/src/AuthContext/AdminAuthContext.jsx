@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { adminAPI } from "../services/api";
+import { adminAPI, superAdminAPI } from "../services/api";
 import { useNavigate } from "react-router-dom";
 const AdminAuthContext = createContext();
 
@@ -35,7 +35,7 @@ export const AdminAuthProvider = ({ children }) => {
       };
 
  const superAdminLogout = async() => {
-    const response=await adminAPI.superAdminLogout();
+    const response=await superAdminAPI.superAdminLogout();
         if(response.data.success){
         setMessage("Logged out successfully");
         setAdmin(null);
