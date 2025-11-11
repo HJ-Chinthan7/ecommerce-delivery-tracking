@@ -1,10 +1,12 @@
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const SuperAdmin = require("../models/SuperAdmin");
 const Admin = require("../models/Admin");
 const Bus = require('../models/Bus');
 const Driver=require("../models/Driver")
 const Region = require("../models/Region");
+const generateSuperAdminToken = require('../utils/generateSAToken');
 module.exports.superAdminLogin = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -37,15 +39,10 @@ module.exports.superAdminLogin = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        email: user.email,
-        role: userType
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = generateSuperAdminToken({
+      _id: user._id,
+      email: user.email
+    });
     res.cookie('token', token, {
       secure: true,
       httpOnly: true,
@@ -224,6 +221,39 @@ res.status(500).json({success:false,error:"Server error" });
   }
 };
 
-module.exports.approveDriver=async(req,res)=>{
 
-}
+module.exports.approveDriver = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(driverId)) {
+      return res.status(400).json({ error: 'Invalid driver ID' });
+    }
+
+    const driver = await Driver.findById(driverId);
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found' });
+    }
+
+    if (!driver) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+    driver.status = "approved";
+    await driver.save();
+
+    res.json({
+      success: true,
+      message: `Driver ${driver.name} (${driver.driverId}) approved successfully.`,
+      driver: {
+        driverId: driver.driverId,
+        name: driver.name,
+        email: driver.email,
+        status: driver.status
+      }
+    });
+  } catch (error) {
+    console.error("Approve driver error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+

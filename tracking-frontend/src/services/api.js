@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const API_BASE_URL =import.meta.env.VITE_APP_BASE_URL||'http://localhost:5002/api'; //  
+const API_BASE_URL = 'http://localhost:5002/api'; // import.meta.env.VITE_APP_BASE_URL||; 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  
+
 });
 
 
@@ -27,9 +27,9 @@ export const authAPI = {
 export const superAdminAPI = {
   superAdminLogin: (credentials) => api.post('/superadmin/superAdminLogin', credentials),
   createAdmin: (adminData) => api.post('/superadmin/createadmin', adminData),
-  approveDriver:(driverId)=>api.put(`/superadmin/approveDriver/${driverId}`),
-  createRegion:(regionData)=>api.post('/superadmin/createregion',regionData),
-  createBus:(busData)=>api.post('/superadmin/createbus',busData),
+  approveDriver: (driverId) => api.put(`/superadmin/approveDriver/${driverId}`),
+  createRegion: (regionData) => api.post('/superadmin/createregion', regionData),
+  createBus: (busData) => api.post('/superadmin/createbus', busData),
   superAdminLogout: () => api.post('/superadmin/superAdminLogout'),
   getAllAdmins: () => api.get('/superadmin/getAllAdmins'),
   getallDrivers: () => api.get('/superadmin/getAllDrivers'),
@@ -38,6 +38,12 @@ export const superAdminAPI = {
 };
 
 export const adminAPI = {
-   adminLogin: (credentials) => api.post('/admin/adminLogin', credentials),
-    adminLogout: () => api.post('/auth/adminLogout'),
+  adminLogin: (credentials) => api.post('/admin/adminLogin', credentials),
+  adminLogout: () => api.post('/admin/adminLogout'),
+  getRegionDrivers: () => api.get('/admin/getRegionDrivers'),
+  getRegionBuses: () => api.get('/admin/getRegionBuses'),
+  //getRegionParcels: () => api.get('/admin/getRegionParcels'),
+  registerDriver: (driverData) => api.post('/admin/registerDriver', driverData),
+  assignBus: (assignmentData) => api.put('/admin/assign-bus', assignmentData),
+
 };

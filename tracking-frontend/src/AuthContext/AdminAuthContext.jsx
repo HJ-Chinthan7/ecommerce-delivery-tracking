@@ -51,10 +51,10 @@ export const AdminAuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         const {role}=credentials;
-        console.log("role in auth context:",role);
      try {
-         const response =role==="superadmin"? await adminAPI.superAdminLogin(credentials):await adminAPI.adminLogin(credentials);
-        if (response.data.success) {
+         const response =role==="superadmin"? await superAdminAPI.superAdminLogin(credentials):await adminAPI.adminLogin(credentials);
+        console.log(response);
+         if (response.data.success) {
         const { token, admin} = response.data;
         setAdmin(admin);
         setToken(token);

@@ -7,13 +7,15 @@ const connectDb=require("./database/db")
 const PORT=process.env.PORT;
 const busDriverSockets = require('./sockets/busDriverSockets');
 const allBusesSockets = require('./sockets/allBusesSockets');
+
 const originList = [
   process.env.FRONTEND_URL,
   process.env.NODE_ENV !== "production" && "http://localhost:5174"
 ].filter(Boolean); 
+
 const io = socketIo(server, {
   cors: {
-    origin:"https://real-time-trackingofbuses.netlify.app",//originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app","http://localhost:5174"],//"https://real-time-trackingofbuses.netlify.app",
+    origin: "http://localhost:5174",//originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app", "http://localhost:5174"],  
     methods: ["GET", "POST"]
   }
 });

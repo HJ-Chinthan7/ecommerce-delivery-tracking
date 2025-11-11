@@ -16,7 +16,7 @@ export const BusAuthProvider = ({ children }) => {
     if (token && !driver) {
       const savedDriver = localStorage.getItem("driver");
       if (savedDriver) setDriver(JSON.parse(savedDriver));
-      if (!socketService.connected) {
+      if (!socketService.connect) {
         socketService.connect(); 
         socketService.busDriverLogin(JSON.parse(savedDriver).busId);}
      
@@ -34,7 +34,7 @@ export const BusAuthProvider = ({ children }) => {
       navigate("/driver");
       localStorage.setItem("token", token);
       localStorage.setItem("driver", JSON.stringify(driver));
-      if (!socketService.connected) {
+      if (!socketService.connect) {
         socketService.connect(); 
         socketService.busDriverLogin(driver.busId);}
     }

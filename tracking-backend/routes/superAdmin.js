@@ -3,7 +3,7 @@ const router=express.Router();
 const superAdminController=require("../controllers/superAdminController");
 const {body}=require('express-validator');
 const SuperAdmin = require('../models/SuperAdmin');
-
+const authenticateSuperAdmin = require('../middleware/authSuperAdmin.middleware');
 
 
 router.post('/superAdminLogin',[body("email").isEmail().withMessage("Invalid Email"),
@@ -12,15 +12,15 @@ body("role").notEmpty().withMessage("Role is required")
 ],superAdminController.superAdminLogin);
 
 //implement middleware for authentication and authorizationhere for superadmin routes
-router.post("/createregion", superAdminController.createRegion);
-router.put('/approveDriver',superAdminController.approveDriver),
-router.post("/createadmin", superAdminController.createAdmin);
-router.post("/createbus", superAdminController.createBus);
-router.get("/getalladmins", superAdminController.getAllAdmins);
-router.get("/getallregions", superAdminController.getAllRegions);
-router.get("/getallbuses", superAdminController.getAllBuses);
-router.get("/getalldrivers", superAdminController.getAllDrivers);
-router.post("/superAdminLogout", superAdminController.superAdminLogout);
+router.post("/createregion",authenticateSuperAdmin, superAdminController.createRegion);
+router.put('/approveDriver/:driverId', authenticateSuperAdmin, superAdminController.approveDriver);
+router.post("/createadmin",authenticateSuperAdmin, superAdminController.createAdmin);
+router.post("/createbus", authenticateSuperAdmin, superAdminController.createBus);
+router.get("/getalladmins",authenticateSuperAdmin, superAdminController.getAllAdmins);
+router.get("/getallregions",authenticateSuperAdmin, superAdminController.getAllRegions);
+router.get("/getallbuses",authenticateSuperAdmin, superAdminController.getAllBuses);
+router.get("/getalldrivers",authenticateSuperAdmin, superAdminController.getAllDrivers);
+router.post("/superAdminLogout",authenticateSuperAdmin, superAdminController.superAdminLogout);
 
 module.exports=router;
 
