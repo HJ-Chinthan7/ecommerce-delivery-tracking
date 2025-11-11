@@ -7,6 +7,7 @@ import OverviewTab from "./OverviewTab";
 import DriversTab from "./DriversTab";
 import BusesTab from "./BusesTab";
 import ParcelsTab from "./ParcelsTab";
+import RoutesTab from "./RoutesTab";
 
 const AdminDashboard = () => {
   const { admin, logout } = useAdminAuth();
@@ -16,7 +17,7 @@ const AdminDashboard = () => {
 
   const [drivers, setDrivers] = useState([]);
   const [buses, setBuses] = useState([]);
-  const [parcels, setParcels] = useState([]);
+  const [parcels, setParcels] = useState([]); // eslint-disable-line no-unused-vars
 
   const [registerDriverForm, setRegisterDriverForm] = useState({
     driverId: "",
@@ -36,11 +37,11 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [driversRes, busesRes, parcelsRes] = await Promise.all([
+      const [driversRes, busesRes, parcelsRes] = await Promise.all([// eslint-disable-line no-unused-vars
         adminAPI.getRegionDrivers(),
         adminAPI.getRegionBuses(),
        // adminAPI.getRegionParcels(),
-      ]);
+      ]); 
 
       setDrivers(driversRes.data.drivers || []);
       setBuses(busesRes.data.buses || []);
@@ -131,6 +132,7 @@ const AdminDashboard = () => {
               { id: "drivers", name: "Manage Drivers" },
               { id: "buses", name: "Manage Buses" },
               { id: "parcels", name: "Manage Parcels" },
+              { id: "routes", name: "Manage Routes" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -181,6 +183,8 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === "parcels" && <ParcelsTab parcels={parcels} />}
+        {activeTab === "routes" && <RoutesTab loading={loading} />}
+
       </div>
     </div>
   );

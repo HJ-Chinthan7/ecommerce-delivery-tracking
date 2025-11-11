@@ -45,5 +45,8 @@ export const adminAPI = {
   //getRegionParcels: () => api.get('/admin/getRegionParcels'),
   registerDriver: (driverData) => api.post('/admin/registerDriver', driverData),
   assignBus: (assignmentData) => api.put('/admin/assign-bus', assignmentData),
-
+  createRoute: (routeData) => api.post('/route/createRoute', routeData),
+  getRegionRoutes: () => api.get('/route/getRegionRoutes'),
+  deleteRoute: (routeId) => api.delete(`/route/deleteRoute/${routeId}`),
+  toggleRouteStatus: (routeId) => api.put(`/route/toggleRouteStatus/${routeId}`),
 };
