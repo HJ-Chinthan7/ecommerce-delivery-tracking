@@ -2,28 +2,91 @@ import { useState } from "react";
 import { adminAPI } from "../../services/api";
 
 const CreateRouteForm = ({ loadRoutes, setMessage, loading }) => {
-  const [newRoute, setNewRoute] = useState({ name: "", description: "", stops: [] });
+  const [newRoute, setNewRoute] = useState({
+    name: "",
+    description: "",
+    maxShifts: 1,
+    stops: [],
+    startTimes: [],
+    endTimes: [],
+  });
+
 
   const handleAddStop = () => {
     setNewRoute({
       ...newRoute,
       stops: [
         ...newRoute.stops,
-        { stopName: "", address: "", order: newRoute.stops.length + 1 },
+        { stopName: "", order: newRoute.stops.length + 1, timings: Array(newRoute.startTimes.length).fill("") },
       ],
     });
   };
 
-  const handleStopChange = (index, field, value) => {
+
+  const handleStopChange = (index, value) => {
     const updatedStops = [...newRoute.stops];
-    updatedStops[index][field] = value;
+    updatedStops[index].stopName = value;
     setNewRoute({ ...newRoute, stops: updatedStops });
   };
 
+ 
+  const handleStopTimingChange = (stopIndex, shiftIndex, value) => {
+    const updatedStops = [...newRoute.stops];
+    updatedStops[stopIndex].timings[shiftIndex] = value;
+    setNewRoute({ ...newRoute, stops: updatedStops });
+  };
+
+ 
   const handleRemoveStop = (index) => {
     const updatedStops = newRoute.stops.filter((_, idx) => idx !== index);
     updatedStops.forEach((stop, idx) => (stop.order = idx + 1));
     setNewRoute({ ...newRoute, stops: updatedStops });
+  };
+
+
+  const handleAddShift = () => {
+    if (newRoute.startTimes.length >= newRoute.maxShifts) {
+      setMessage(`Cannot add more than ${newRoute.maxShifts} shifts`);
+      return;
+    }
+    setNewRoute({
+      ...newRoute,
+      startTimes: [...newRoute.startTimes, ""],
+      endTimes: [...newRoute.endTimes, ""],
+      stops: newRoute.stops.map((stop) => ({
+        ...stop,
+        timings: [...stop.timings, ""],
+      })),
+    });
+  };
+
+
+  const handleShiftChange = (index, value, type = "start") => {
+    if (type === "start") {
+      const updatedStart = [...newRoute.startTimes];
+      updatedStart[index] = value;
+      setNewRoute({ ...newRoute, startTimes: updatedStart });
+    } else {
+      const updatedEnd = [...newRoute.endTimes];
+      updatedEnd[index] = value;
+      setNewRoute({ ...newRoute, endTimes: updatedEnd });
+    }
+  };
+
+
+  const handleRemoveShift = (index) => {
+    const updatedStart = [...newRoute.startTimes];
+    const updatedEnd = [...newRoute.endTimes];
+    updatedStart.splice(index, 1);
+    updatedEnd.splice(index, 1);
+
+    const updatedStops = newRoute.stops.map((stop) => {
+      const newTimings = [...stop.timings];
+      newTimings.splice(index, 1);
+      return { ...stop, timings: newTimings };
+    });
+
+    setNewRoute({ ...newRoute, startTimes: updatedStart, endTimes: updatedEnd, stops: updatedStops });
   };
 
   const handleCreateRoute = async (e) => {
@@ -32,13 +95,24 @@ const CreateRouteForm = ({ loadRoutes, setMessage, loading }) => {
       setMessage("Route name and stops are required");
       return;
     }
+    if (newRoute.startTimes.length === 0) {
+      setMessage("At least one shift is required");
+      return;
+    }
     try {
       await adminAPI.createRoute(newRoute);
       setMessage("Route created successfully");
-      setNewRoute({ name: "", description: "", stops: [] });
+      setNewRoute({
+        name: "",
+        description: "",
+        maxShifts: 1,
+        stops: [],
+        startTimes: [],
+        endTimes: [],
+      });
       await loadRoutes();
     } catch (err) {
-      console.error("Error creating route:", err);
+      console.error(err);
       setMessage("Failed to create route");
     }
   };
@@ -54,6 +128,7 @@ const CreateRouteForm = ({ loadRoutes, setMessage, loading }) => {
         onChange={(e) => setNewRoute({ ...newRoute, name: e.target.value })}
         className="border p-2 w-full rounded"
       />
+
       <textarea
         placeholder="Description"
         value={newRoute.description}
@@ -61,30 +136,42 @@ const CreateRouteForm = ({ loadRoutes, setMessage, loading }) => {
         className="border p-2 w-full rounded"
       />
 
+      <input
+        type="number"
+        placeholder="Max Shifts"
+        min={1}
+        value={newRoute.maxShifts || ""}
+        onChange={(e) => setNewRoute({ ...newRoute, maxShifts: Number(e.target.value) })}
+        className="border p-2 w-full rounded"
+      />
+
+      
       <div>
-        <h4 className="font-medium mb-1">Stops</h4>
-        {newRoute.stops.map((stop, idx) => (
-          <div
-            key={idx}
-            className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-2"
-          >
+        <h4 className="font-medium mb-1">Stops & Timings</h4>
+        {newRoute.stops.map((stop, stopIdx) => (
+          <div key={stopIdx} className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-2">
             <input
               type="text"
-              placeholder={`Stop ${idx + 1} Name`}
+              placeholder={`Stop ${stopIdx + 1} Name`}
               value={stop.stopName}
-              onChange={(e) => handleStopChange(idx, "stopName", e.target.value)}
+              onChange={(e) => handleStopChange(stopIdx, e.target.value)}
               className="border p-1 rounded flex-1 mb-1 sm:mb-0"
             />
-            <input
-              type="text"
-              placeholder="Address"
-              value={stop.address}
-              onChange={(e) => handleStopChange(idx, "address", e.target.value)}
-              className="border p-1 rounded flex-1 mb-1 sm:mb-0"
-            />
+
+            {newRoute.startTimes.map((_, shiftIdx) => (
+              <input
+                key={shiftIdx}
+                type="time"
+                value={stop.timings[shiftIdx] || ""}
+                onChange={(e) => handleStopTimingChange(stopIdx, shiftIdx, e.target.value)}
+                className="border p-1 rounded flex-1 mb-1 sm:mb-0"
+                placeholder={`Shift ${shiftIdx + 1}`}
+              />
+            ))}
+
             <button
               type="button"
-              onClick={() => handleRemoveStop(idx)}
+              onClick={() => handleRemoveStop(stopIdx)}
               className="bg-red-500 text-white px-2 py-1 rounded self-start sm:self-auto"
             >
               X
@@ -97,6 +184,41 @@ const CreateRouteForm = ({ loadRoutes, setMessage, loading }) => {
           className="bg-blue-500 text-white px-3 py-1 rounded"
         >
           Add Stop
+        </button>
+      </div>
+
+ 
+      <div>
+        <h4 className="font-medium mt-2 mb-1">Shifts (Start / End Times)</h4>
+        {newRoute.startTimes.map((_, idx) => (
+          <div key={idx} className="flex space-x-2 mb-2">
+            <input
+              type="time"
+              value={newRoute.startTimes[idx]}
+              onChange={(e) => handleShiftChange(idx, e.target.value, "start")}
+              className="border p-1 rounded flex-1"
+            />
+            <input
+              type="time"
+              value={newRoute.endTimes[idx]}
+              onChange={(e) => handleShiftChange(idx, e.target.value, "end")}
+              className="border p-1 rounded flex-1"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveShift(idx)}
+              className="bg-red-500 text-white px-2 py-1 rounded"
+            >
+              X
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={handleAddShift}
+          className="bg-blue-500 text-white px-3 py-1 rounded"
+        >
+          Add Shift
         </button>
       </div>
 

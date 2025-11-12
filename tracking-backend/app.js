@@ -10,7 +10,7 @@ const adminRouter=require('./routes/admin');
 
 
 connectDb=require("./database/db")
-const appOrigin="http://localhost:5174"//process.env.FRONTEND_URL||;
+const appOrigin=process.env.FRONTEND_URL; //"http://localhost:5174"//
 app.use(cors({
   origin: appOrigin,
   methods: ["GET", "POST", "PUT", "DELETE"],

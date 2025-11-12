@@ -4,8 +4,7 @@ const routeController = require('../controllers/routeController');
 const authenticateAdmin = require('../middleware/authAdmin.middleware');
 
 router.post('/createRoute', authenticateAdmin, routeController.createRoute);
-router.get('/getAllRoutes', authenticateAdmin, routeController.getAllRoutes);
-router.get('/getRoute/:routeId', authenticateAdmin, routeController.getRouteById); 
+router.get('/getRegionRoutes', authenticateAdmin, routeController.getRegionRoutes); 
 router.put('/updateRoute/:routeId', authenticateAdmin, routeController.updateRoute);
 router.delete('/deleteRoute/:routeId', authenticateAdmin, routeController.deleteRoute);
 router.patch('/toggleRouteStatus/:routeId', authenticateAdmin, routeController.toggleRouteStatus);

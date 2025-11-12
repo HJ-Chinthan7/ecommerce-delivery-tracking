@@ -15,7 +15,7 @@ const originList = [
 
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:5174",//originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app", "http://localhost:5174"],  
+    origin:originList.length > 0 ? originList : ["https://real-time-trackingofbuses.netlify.app", "http://localhost:5174"],  // "http://localhost:5174",//
     methods: ["GET", "POST"]
   }
 });

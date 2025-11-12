@@ -1,50 +1,66 @@
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
+
 
 const busStopSchema = new mongoose.Schema({
   stopId: {
     type: String,
-    required: true
+    default: () => uuidv4(), 
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
-  address: {
-    type: String,
-    required: true
+ 
+  timings: {
+    type: [String], 
+    default: [],
   },
   order: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 });
+
 
 const routeSchema = new mongoose.Schema({
   routeId: {
     type: String,
-    required: true,
-    unique: true
+    default: () => uuidv4(),
+    unique: true,
+  },
+  maxshifts: {
+    type: Number,
+    default: 1,
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    default: ''
+    default: '',
   },
   busStops: [busStopSchema],
+  startTimes: {
+    type: [String], 
+    default: [],
+  },
+  endTimes: {
+    type: [String], 
+    default: [],
+  },
   regionId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Region",
-    required: true
+    required: true,
   },
   isActive: {
     type: Boolean,
-    default: true
-  }
+    default: true,
+  },
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
 module.exports = mongoose.model('Route', routeSchema);

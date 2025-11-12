@@ -22,13 +22,16 @@ const RoutesTab = ({ loading }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20"> 
       {message && (
         <div className="bg-green-100 text-green-800 p-2 rounded">{message}</div>
       )}
-      
+
       <CreateRouteForm loadRoutes={loadRoutes} setMessage={setMessage} loading={loading} />
-      <RouteList routes={routes} loadRoutes={loadRoutes} setMessage={setMessage} />
+      
+      <div className="pb-10"> 
+        <RouteList routes={routes} loadRoutes={loadRoutes} setMessage={setMessage} />
+      </div>
     </div>
   );
 };
