@@ -137,7 +137,7 @@ module.exports.getRegionBuses = async (req, res) => {
         const regionId = req.user.regionId;
 
         const buses = await Bus.find({ regionId })
-            .populate("regionId", "name");
+            .populate("regionId", "name").populate("driverId", "name email _id").populate("routeId", "name code _id");
 
         res.json({
             success: true,
@@ -174,8 +174,6 @@ module.exports.assignBus = async (req, res) => {
     try {
         const { driverId, busId } = req.body;
         const regionId = req.user.regionId._id;
-        console.log("Assign bus req.body:", req.body);
-        console.log("Admin regionId:", req.user.regionId._id);
 
         if (!driverId || !busId) {
             return res
@@ -203,6 +201,7 @@ module.exports.assignBus = async (req, res) => {
         await driver.save();
 
         bus.driverId = driverId;
+        bus.isActive = true;
         await bus.save();
 
         res.json({

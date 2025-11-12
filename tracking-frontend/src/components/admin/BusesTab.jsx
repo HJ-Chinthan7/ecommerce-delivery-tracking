@@ -43,7 +43,7 @@ const BusesTab=({
                 <option value="">Select Bus</option>
                 {buses.map((bus) => (
                   <option key={bus._id} value={bus._id}>
-                    Bus {bus.busId} (Route: {bus.routeId})
+                    Bus {bus.busId} (Route: {bus.routeId?._id })
                   </option>
                 ))}
               </select>
@@ -66,8 +66,9 @@ const BusesTab=({
             {buses.map((bus) => (
               <div key={bus._id} className="p-3 border rounded-lg">
                 <p className="font-medium">Bus {bus.busId}</p>
-                <p className="text-sm text-gray-500">Driver: {bus.driverId}</p>
-                <p className="text-sm text-gray-500">Route: {bus.routeId}</p>
+                <p className="text-sm text-gray-500">Driver: {bus?.driverId?.name}</p>
+                <p className="text-sm text-gray-500">Driver: {bus?.driverId?._id}</p>
+                <p className="text-sm text-gray-500">Route: {bus?.routeId?._id}</p>
                 <p className="text-sm text-gray-500">
                   Location: {bus.currentLocation?.lat}, {bus.currentLocation?.lon}
                 </p>

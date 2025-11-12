@@ -8,7 +8,7 @@ import DriversTab from "./DriversTab";
 import BusesTab from "./BusesTab";
 import ParcelsTab from "./ParcelsTab";
 import RoutesTab from "./RoutesTab";
-
+import AssignRoute from "./AssignRoute";
 const AdminDashboard = () => {
   const { admin, logout } = useAdminAuth();
   const [activeTab, setActiveTab] = useState("overview");
@@ -104,7 +104,6 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
-
   const approvedDrivers = drivers.filter((driver) => driver.status === 'approved');
   const pendingDrivers = drivers.filter((driver) =>  driver.status === 'pending');
 
@@ -133,6 +132,7 @@ const AdminDashboard = () => {
               { id: "buses", name: "Manage Buses" },
               { id: "parcels", name: "Manage Parcels" },
               { id: "routes", name: "Manage Routes" },
+              { id: "routesassign", name: "Assign Routes" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -184,6 +184,8 @@ const AdminDashboard = () => {
 
         {activeTab === "parcels" && <ParcelsTab parcels={parcels} />}
         {activeTab === "routes" && <RoutesTab loading={loading} />}
+        
+        {activeTab === "routesassign" && <AssignRoute loading={loading} />}
 
       </div>
     </div>

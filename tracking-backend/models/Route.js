@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
-const { v4: uuidv4 } = require('uuid');
 
 
 const busStopSchema = new mongoose.Schema({
   stopId: {
     type: String,
-    default: () => uuidv4(), 
+     default: async () => {
+      const { v4: uuidv4 } = await import('uuid');
+      return uuidv4();
+     }
   },
   name: {
     type: String,

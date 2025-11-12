@@ -152,7 +152,7 @@ module.exports.createBus = async (req, res) => {
       driverId: null,
       parcels: [],
       currentLocation: { lat: 0, lng: 0 },
-      isActive: true,
+      isActive: false,
       status: 'approved',
       currentBusStop: { stopId: null, name: null },
       nextBusStop: { stopId: null, name: null }

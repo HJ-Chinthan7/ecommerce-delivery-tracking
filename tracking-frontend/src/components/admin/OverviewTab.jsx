@@ -89,7 +89,7 @@ const OverviewTab=({ drivers, buses, parcels })=> {
                 <div key={driver._id} className="p-3 border rounded-lg">
                   <p className="font-medium">{driver.name}</p>
                   <p className="text-sm text-gray-500">{driver.email}</p>
-                  <p className="text-sm text-gray-500">Driver ID: {driver.driverId}</p>
+                  <p className="text-sm text-gray-500">Driver ID: {driver._id}</p>
                   <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending Approval</span>
                 </div>
               ))}
@@ -109,8 +109,10 @@ const OverviewTab=({ drivers, buses, parcels })=> {
               {buses.slice(0, 5).map((bus) => (
                 <div key={bus._id} className="p-3 border rounded-lg">
                   <p className="font-medium">Bus {bus.busId}</p>
-                  <p className="text-sm text-gray-500">Driver: {bus.driverId}</p>
-                  <p className="text-sm text-gray-500">Route: {bus.routeId}</p>
+                  
+                  <p className="text-sm text-gray-500">Driver: {bus?.driverId?.name}</p>
+                  <p className="text-sm text-gray-500">Driver: {bus?.driverId?._id}</p>
+                  <p className="text-sm text-gray-500">Route: {bus?.routeId?._id}</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${bus.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                     {bus.isActive ? 'Active' : 'Inactive'}
                   </span>

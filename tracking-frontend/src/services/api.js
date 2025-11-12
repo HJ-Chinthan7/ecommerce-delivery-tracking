@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL||'http://localhost:5002/api'; // ; 
+const API_BASE_URL ='http://localhost:5002/api'; // import.meta.env.VITE_APP_BASE_URL|| ; 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -48,5 +48,7 @@ export const adminAPI = {
   createRoute: (routeData) => api.post('/route/createRoute', routeData),
   getRegionRoutes: () => api.get('/route/getRegionRoutes'),
   deleteRoute: (routeId) => api.delete(`/route/deleteRoute/${routeId}`),
-  toggleRouteStatus: (routeId) => api.put(`/route/toggleRouteStatus/${routeId}`),
+  toggleRouteStatus: (routeId) => api.patch(`/route/toggleRouteStatus/${routeId}`),
+  unAssignBusRoute: (busId) => api.patch(`/route/unAssignBusRoute/${busId}`),
+  assignBusRoute: (assignmentData) => api.patch('/route/assignBusRoute', assignmentData),
 };
