@@ -37,7 +37,12 @@ const busSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  status: {
+  direction: {
+    type: String,
+    enum: ["return", "forward"],
+    default: "forward"
+  },
+   status: {
     type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending"
@@ -61,7 +66,12 @@ const busSchema = new mongoose.Schema({
       type: String,
       default: null
     }
-  }
+  },
+   RouteOrderNo: {
+    type: Number,
+    required: true,
+    default: 0
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Bus", busSchema);

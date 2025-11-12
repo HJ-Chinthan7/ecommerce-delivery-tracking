@@ -52,3 +52,9 @@ export const adminAPI = {
   unAssignBusRoute: (busId) => api.patch(`/route/unAssignBusRoute/${busId}`),
   assignBusRoute: (assignmentData) => api.patch('/route/assignBusRoute', assignmentData),
 };
+
+export const driverAPI = {
+  getBusRouteDetails: (busId) => api.get(`/driver/getBusRouteDetails/${busId}`),
+  updateBusStop: (busId, data) => api.patch(`/driver/updateBusStop/${busId}`, data),
+  sendNotification: (busId) => api.post(`/driver/sendNotification/${busId}`),
+};

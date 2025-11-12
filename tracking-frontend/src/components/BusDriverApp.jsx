@@ -1,21 +1,24 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext/BusAuthContext";
 import BusDriverLogin from "./BusDriverLogin";
 import Navbar from "./Navbar";
 import Tabs from "./Tabs";
 import BusMap from "./BusMap";
-import RouteInfo from "./RouteInfo";
 import DeliveriesTable from "./DeliveriesTable";
+import RouteInfoPage from "./RouteInfoPage";
 
 const BusDriverApp = () => {
-  const { driver, logout ,setLocation} = useAuth();
-  const {message,setMessage}=useState("")
+  const { driver, logout, setLocation } = useAuth();
+  const { message, setMessage } = useState("");
   const [tracking, setTracking] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState("Map View");
- 
+
+  const [selectedStart, setSelectedStart] = useState("");
+  const [selectedEnd, setSelectedEnd] = useState("");
+
   useEffect(() => {
-    if (!driver) return; 
+    if (!driver) return;
 
     if (!navigator.geolocation) {
       setMessage("Geolocation not supported by this browser");
@@ -23,7 +26,6 @@ const BusDriverApp = () => {
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-
         setLocation({
           lat: pos.coords.latitude,
           lon: pos.coords.longitude,
@@ -31,12 +33,11 @@ const BusDriverApp = () => {
       },
       (err) => {
         console.error("Error getting location:", err);
-        setMessage("Unable to get your location. Please enable location services.");
+        setMessage(
+          "Unable to get your location. Please enable location services."
+        );
       },
-      { enableHighAccuracy: true,
-         timeout: 10000,
-        maximumAge: 0 
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, []);
 
@@ -46,7 +47,7 @@ const BusDriverApp = () => {
       <Navbar activeTab={activeTab} logout={logout} />
       <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="p-6 max-w-7xl mx-auto">
-         {message && (
+        {message && (
           <div className="mb-4 p-3 rounded-md bg-red-100 text-red-700">
             {message}
           </div>
@@ -59,7 +60,9 @@ const BusDriverApp = () => {
             setShowAll={setShowAll}
           />
         )}
-        {activeTab === "Route List" && <RouteInfo />}
+        {activeTab === "Route List" && (
+          <RouteInfoPage busId={driver?.bus._id} selectedEnd={selectedEnd} selectedStart={selectedStart} setSelectedEnd={setSelectedEnd} setSelectedStart={setSelectedStart}/>
+        )}
         {activeTab === "Parcels" && <DeliveriesTable />}
       </div>
     </div>
