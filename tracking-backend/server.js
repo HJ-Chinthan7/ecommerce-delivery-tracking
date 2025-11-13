@@ -20,8 +20,14 @@ const io = socketIo(server, {
   }
 });
 connectDb().then(() => {
-  busDriverSockets(io);
-  allBusesSockets(io);
+  io.on("connection", (socket) => {
+      
+      busDriverSockets(io, socket);
+      allBusesSockets(io, socket);
+
+      socket.on("disconnect", () => {
+      });
+    });
   server.listen(PORT, () => {
     console.log(`Tracking backend server running on port ${PORT}`);
   });

@@ -1,27 +1,25 @@
 
-const buses = require('../memoryStorage');
-const allBusesSockets = (io) => {
 
-    io.on('connection', (socket) => {
+const buses = require("../memoryStorage");
 
-        socket.on('joinAllBuses', () => {
-            socket.join('all_buses');
-        });
+const allBusesSockets = (io, socket) => {
+  socket.on("joinAllBuses", () => {
+    socket.join("all_buses");
+  });
 
-        socket.on('leaveAllBuses', () => {
-            socket.leave('all_buses');
-        });
+  socket.on("leaveAllBuses", () => {
+    socket.leave("all_buses");
+  });
 
-        socket.on("updateBusLocation", ({ busId, lat, lon }) => {
-            buses[busId] = { lat, lon, timestamp: Date.now() };
+  socket.on("updateBusLocation", ({ busId, lat, lon }) => {
+    if (!busId || !lat || !lon) return;
+    buses[busId] = { lat, lon, timestamp: Date.now() };
 
-            io.to(`bus_${busId}`).emit("bus:location", buses[busId]);
+    io.to(`bus_${busId}`).emit("bus:location", buses[busId]);
 
-            io.to("all_buses").emit("buses:all", buses);
-        });
+    io.to("all_buses").emit("buses:all", buses);
 
-    });
+  });
 };
+
 module.exports = allBusesSockets;
-
-
