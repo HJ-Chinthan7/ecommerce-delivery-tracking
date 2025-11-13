@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f3f4f6] via-[#e5e7eb] to-[#d1d5db] flex flex-col items-center py-20">
       <div className="max-w-6xl w-full px-6">
-        {/* Header */}
+       
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4">
             Real-time Parcel Tracking
@@ -17,9 +17,9 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Cards */}
+        
         <div className="grid md:grid-cols-4 gap-10">
-          {/* Admin Panel */}
+         
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <img
@@ -40,7 +40,7 @@ const Home = () => {
             </Link>
           </div>
 
-          {/* Bus Driver App */}
+          
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center">
             <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
               <img
@@ -61,7 +61,7 @@ const Home = () => {
             </Link>
           </div>
 
-          {/* Track Parcel */}
+          
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

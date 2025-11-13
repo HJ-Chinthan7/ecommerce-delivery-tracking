@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
-import axios from "axios";
+import { publicAPI } from "../services/api";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -38,19 +39,27 @@ const FlyMarker = ({ position }) => {
 };
 
 const PublicBusTracker = () => {
-  const [busId, setBusId] = useState("");
+  const { busId: paramBusId } = useParams();
+  const [busId, setBusId] = useState(paramBusId || "");
   const [busLocation, setBusLocation] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [error, setError] = useState("");
 
+  
   useEffect(() => {
-    if (!busId || !socketService.socket) return;
+    if (!busId) return;
+
+    if (!socketService.socket || !socketService.socket.connected) {
+      socketService.connect();
+    }
 
     socketService.socket.emit("joinBusRoom", { busId });
+    console.log(`Joined bus room: ${busId}`);
 
     const handleLocation = (loc) => {
       setBusLocation([loc.lat, loc.lon]);
       setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
+      setError("");
     };
 
     socketService.socket.on("bus:location", handleLocation);
@@ -61,27 +70,31 @@ const PublicBusTracker = () => {
     };
   }, [busId]);
 
-  
+ 
   const refreshLocation = async () => {
     if (!busId) return;
     try {
-      const res = await axios.get(`/api/public-tracking/${busId}`);
+      const res = await publicAPI.get(`/api/public-tracking/${busId}`);
       if (res.data.success) {
         const loc = res.data.location;
         setBusLocation([loc.lat, loc.lon]);
         setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
         setError("");
-      } else {
-        setError("Bus not found");
-      }
+      } else setError("Bus not found");
     } catch (err) {
-      setError("Failed to fetch bus location",err.message);
+      console.error(err);
+      setError("Failed to fetch bus location");
     }
   };
 
+  
+  useEffect(() => {
+    if (paramBusId && !busId) setBusId(paramBusId);
+  }, [paramBusId]);
+
   return (
     <div className="flex h-screen">
-     
+      {/* Side panel */}
       <div className="w-1/3 p-4 bg-white shadow-md">
         <h2 className="text-xl font-semibold mb-4">Track Your Bus</h2>
         <input
@@ -97,6 +110,7 @@ const PublicBusTracker = () => {
         >
           Refresh Location
         </button>
+
         {busLocation && (
           <div className="mt-4 space-y-2">
             <p>
@@ -113,11 +127,11 @@ const PublicBusTracker = () => {
         {error && <p className="text-red-500 mt-2">{error}</p>}
       </div>
 
-  
-      <div className="flex-1">
+   
+      <div className="flex-1 m-5">
         <MapContainer
           center={busLocation || [12.9716, 77.5946]}
-          zoom={18}
+          zoom={16}
           className="h-full w-full"
         >
           <TileLayer

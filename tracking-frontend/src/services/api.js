@@ -58,3 +58,7 @@ export const driverAPI = {
   updateBusStop: (busId, data) => api.patch(`/driver/updateBusStop/${busId}`, data),
   sendNotification: (busId) => api.post(`/driver/sendNotification/${busId}`),
 };
+
+export const publicAPI = {
+  getBusLocationtracking: (busId) => api.get(`/public-tracking/getBusLocation/${busId}`),
+};
