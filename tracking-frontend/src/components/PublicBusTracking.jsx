@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { useParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
-import { publicAPI } from "../services/api";
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,12 +31,10 @@ const busIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
-
 const FlyMarker = ({ position }) => {
   const map = useMap();
   useEffect(() => {
     if (position) {
-      console.log("[FlyMarker] Moving map to:", position);
       map.flyTo(position, map.getZoom(), { duration: 0.5 });
     }
   }, [position, map]);
@@ -51,64 +47,57 @@ const FlyMarker = ({ position }) => {
 };
 
 const PublicBusTracker = () => {
-  const { parcelId } = useParams(); 
+  const { parcelId } = useParams();
   const [busId, setBusId] = useState(parcelId || "");
   const [busLocation, setBusLocation] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [tracking, setTracking] = useState(false);
   const [error, setError] = useState("");
+  const trackingIntervalRef = useRef(null);
 
   useEffect(() => {
+    if (!tracking || !busId) return;
 
-   socketService.connect();
+    console.log("🟢 Tracking started, connecting socket...");
 
+    const socket =socketService.connect();
+   socket.on("connect", () => {
+  console.log(" Socket connected");
+  socketService.joinBusRoom(busId);
 
-    if (busId) {
-      socketService.joinBusRoom(busId);
-    }
-
-  
-    const handleLocationUpdate = (loc) => {
-      if (loc && loc.lat && loc.lon) {
-        setBusLocation([loc.lat, loc.lon]);
-        setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
-      }
-    };
-
-    socketService.on("bus:location", handleLocationUpdate);
-
-   
-    return () => {
-      console.log(" Leaving bus room:", busId);
-      socketService.leaveBusRoom(busId);
-      socketService.off("bus:location");
-    };
-  }, [busId]);
-
-  const refreshLocation = async () => {
-    if (!busId) {
-      alert("Enter a Bus ID first");
-      return;
-    }
-
-    try {
-      const res = await publicAPI.getBusLocationtracking(busId);
-      console.log("API response:", res.data);
-
-      if (res?.data?.success && res.data.location) {
-        const loc = res.data.location;
-        setBusLocation([loc.lat, loc.lon]);
-        setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
-        setError("");
-      } else {
-        setError("Bus not found or no location data");
-      }
-    } catch (err) {
-      console.error(" Error fetching bus location:", err);
-      setError("Failed to fetch bus location");
+  const handleLocationUpdate = (loc) => {
+    console.log("  location update:", loc);
+    if (loc?.lat && loc?.lon) {
+      setBusLocation([loc.lat, loc.lon]);
+      setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
+      setError("");
     }
   };
 
-  console.log(" Bus location:", busLocation);
+  socketService.on("bus:location", handleLocationUpdate);
+
+  trackingIntervalRef.current = setInterval(() => {
+    console.log(" Re-listening for location updates...");
+    socketService.off("bus:location");
+    socketService.on("bus:location", handleLocationUpdate);
+  }, 10000);
+});
+    return () => {
+      console.log(" Stopping tracking and clearing socke");
+      clearInterval(trackingIntervalRef.current);
+      socketService.leaveBusRoom(busId);
+      socketService.off("bus:location");
+    };
+  }, [tracking, busId]);
+
+  const handleTrackingToggle = () => {
+    if (!busId) {
+      alert("Enter a Bus ID first!");
+      return;
+    }
+
+    setTracking((prev) => !prev);
+  };
 
   return (
     <div className="flex h-screen">
@@ -122,18 +111,27 @@ const PublicBusTracker = () => {
           onChange={(e) => setBusId(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+
         <button
-          onClick={refreshLocation}
-          className="bg-blue-600 text-white py-2 px-4 rounded w-full mb-2"
+          onClick={handleTrackingToggle}
+          className={`${
+            tracking ? "bg-red-600" : "bg-green-600"
+          } text-white py-2 px-4 rounded w-full`}
         >
-          Refresh Location
+          {tracking ? "Stop Tracking" : "Start Tracking"}
         </button>
 
         {busLocation ? (
           <div className="mt-4 space-y-2">
-            <p><strong>Latitude:</strong> {busLocation[0].toFixed(5)}</p>
-            <p><strong>Longitude:</strong> {busLocation[1].toFixed(5)}</p>
-            <p><strong>Last Update:</strong> {lastUpdate}</p>
+            <p>
+              <strong>Latitude:</strong> {busLocation[0].toFixed(5)}
+            </p>
+            <p>
+              <strong>Longitude:</strong> {busLocation[1].toFixed(5)}
+            </p>
+            <p>
+              <strong>Last Update:</strong> {lastUpdate}
+            </p>
           </div>
         ) : (
           <p className="text-gray-500 mt-2">No location yet</p>
@@ -144,7 +142,7 @@ const PublicBusTracker = () => {
 
       <div className="flex-1 m-5 rounded-lg overflow-hidden shadow-lg">
         <MapContainer
-          center={busLocation || [12.9716, 77.5946]} 
+          center={busLocation || [12.9716, 77.5946]}
           zoom={15}
           className="h-full w-full"
         >
