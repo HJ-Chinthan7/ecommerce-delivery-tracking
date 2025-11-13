@@ -13,9 +13,10 @@ const BusDriverApp = () => {
   const [tracking, setTracking] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState("Map View");
-
+  const [bus, setBus] = useState(null);
   const [selectedStart, setSelectedStart] = useState("");
   const [selectedEnd, setSelectedEnd] = useState("");
+  const [route, setRoute] = useState(null);
 
   useEffect(() => {
     if (!driver) return;
@@ -58,10 +59,22 @@ const BusDriverApp = () => {
             setTracking={setTracking}
             showAll={showAll}
             setShowAll={setShowAll}
+            bus={bus}
+            route={route}
           />
         )}
         {activeTab === "Route List" && (
-          <RouteInfoPage busId={driver?.bus._id} selectedEnd={selectedEnd} selectedStart={selectedStart} setSelectedEnd={setSelectedEnd} setSelectedStart={setSelectedStart}/>
+          <RouteInfoPage
+            busId={driver?.bus._id}
+            selectedEnd={selectedEnd}
+            selectedStart={selectedStart}
+            setSelectedEnd={setSelectedEnd}
+            setSelectedStart={setSelectedStart}
+            bus={bus}
+            setBus={setBus}
+            route={route}
+            setRoute={setRoute}
+          />
         )}
         {activeTab === "Parcels" && <DeliveriesTable />}
       </div>

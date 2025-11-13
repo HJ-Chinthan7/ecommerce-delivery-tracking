@@ -3,11 +3,19 @@ import CurrentStatusCard from "./CurrentStatusCard";
 import RouteStops from "./RouteStops";
 import dayjs from "dayjs";
 import { driverAPI } from "../services/api";
-import '../styles/loader.css';
+import "../styles/loader.css";
 
-const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelectedStart }) => {
-  const [route, setRoute] = useState(null);
-  const [bus, setBus] = useState(null);
+const RouteInfoPage = ({
+  busId,
+  selectedEnd,
+  selectedStart,
+  setSelectedEnd,
+  setSelectedStart,
+  bus,
+  setBus,
+  route,
+  setRoute,
+}) => {
   const [currentTime, setCurrentTime] = useState(dayjs());
   const [withinTime, setWithinTime] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,8 +60,8 @@ const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelec
     const [startH, startM] = selectedStart.split(":").map(Number);
     const [endH, endM] = selectedEnd.split(":").map(Number);
 
-    const startMinutes = startH * 60 + startM - 5; 
-    const endMinutes = endH * 60 + endM + 5;      
+    const startMinutes = startH * 60 + startM - 5;
+    const endMinutes = endH * 60 + endM + 5;
 
     const inWindow = nowMinutes >= startMinutes && nowMinutes <= endMinutes;
     setWithinTime(inWindow);
@@ -76,7 +84,7 @@ const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelec
       await driverAPI.sendBusNotification(bus._id, {
         startTime: selectedStart,
         endTime: selectedEnd,
-        routeName: route.name
+        routeName: route.name,
       });
       alert("Notification sent to all parcel recipients!");
     } catch (err) {
@@ -106,7 +114,11 @@ const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelec
 
       <div>
         <label className="font-medium">Select Start Time:</label>
-        <select className="ml-2 border p-2 rounded" value={selectedStart} onChange={handleStartChange}>
+        <select
+          className="ml-2 border p-2 rounded"
+          value={selectedStart}
+          onChange={handleStartChange}
+        >
           <option value="">-- Select --</option>
           {route.startTimes.map((time, idx) => (
             <option key={idx} value={time}>
@@ -114,11 +126,19 @@ const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelec
             </option>
           ))}
         </select>
-        {selectedEnd && <span className="ml-3 text-gray-700">End Time: {selectedEnd}</span>}
+        {selectedEnd && (
+          <span className="ml-3 text-gray-700">End Time: {selectedEnd}</span>
+        )}
       </div>
 
-      <p className="text-sm text-gray-700">Current time: {currentTime.format("HH:mm:ss")}</p>
-      <p className={withinTime ? "text-green-600 font-medium" : "text-red-500 font-medium"}>
+      <p className="text-sm text-gray-700">
+        Current time: {currentTime.format("HH:mm:ss")}
+      </p>
+      <p
+        className={
+          withinTime ? "text-green-600 font-medium" : "text-red-500 font-medium"
+        }
+      >
         {withinTime ? "Within time window" : "Not within active time window"}
       </p>
 
@@ -127,7 +147,9 @@ const RouteInfoPage = ({ busId,selectedEnd,selectedStart,setSelectedEnd,setSelec
       <button
         onClick={sendNotification}
         disabled={!withinTime || sendingNotification}
-        className={`px-4 py-2 rounded text-white ${withinTime ? "bg-blue-600" : "bg-gray-400"} ${sendingNotification ? "opacity-50" : ""}`}
+        className={`px-4 py-2 rounded text-white ${
+          withinTime ? "bg-blue-600" : "bg-gray-400"
+        } ${sendingNotification ? "opacity-50" : ""}`}
       >
         {sendingNotification ? "Sending..." : "  Send Notification"}
       </button>

@@ -16,58 +16,66 @@ export const BusAuthProvider = ({ children }) => {
     if (token && !driver) {
       const savedDriver = localStorage.getItem("driver");
       if (savedDriver) setDriver(JSON.parse(savedDriver));
-      if (!socketService.connect) {
-        socketService.connect(); 
-        socketService.busDriverLogin(JSON.parse(savedDriver).busId);}
-     
+      if (!socketService.socket || !socketService.socket.connected) {
+        socketService.connect();
+        socketService.busDriverLogin(JSON.parse(savedDriver).busId);
+      }
     }
   }, [token]);
 
   const login = async (credentials) => {
     const response = await authAPI.busLogin(credentials);
     if (response.data.success) {
-      const { token, driver} = response.data;
+      const { token, driver } = response.data;
       setDriver(driver);
       setToken(token);
       setIsLoggedIn(true);
       setMessage("Login successful!");
-      navigate("/driver");
       localStorage.setItem("token", token);
       localStorage.setItem("driver", JSON.stringify(driver));
-      if (!socketService.connect) {
-        socketService.connect(); 
-        socketService.busDriverLogin(driver.busId);}
+      if (!socketService.socket || !socketService.socket.connected) {
+        socketService.connect();
+        socketService.busDriverLogin(driver?.bus?._id);
+      }
+      navigate("/driver");
     }
   };
 
-  const logout = async() => {
-  
+  const logout = async () => {
+    if (socketService.socket && socketService.socket.connected) {
+      socketService.busDriverLogout(driver?.bus?._id);
       socketService.disconnect();
-      socketService.busDriverLogout(driver.busId);
-    if (!socketService.connected) {
-     //see here i need to disconnect socket when logout i have done in the above without checking if it is connected or not i have to see the socket.connteced implemtation 
-    } 
-   const response=await authAPI.driverLogout();
-    if(response.data.success){
-      setMessage("Logged out successfully");
-        setDriver(null);
-    setToken(null);
-      setIsLoggedIn(false);
-    localStorage.clear();
-    navigate("/login");
     }
-    else{
+    const response = await authAPI.driverLogout();
+    if (response.data.success) {
+      setMessage("Logged out successfully");
+      setDriver(null);
+      setToken(null);
+      setIsLoggedIn(false);
+      localStorage.clear();
+      navigate("/login");
+    } else {
       setMessage("Logout failed. Please try again.");
     }
-
-
   };
 
   return (
-    <BusAuthContext.Provider value={{ driver,message,setMessage,isLoggedIn, token, login, logout,setLocation,location }}>
+    <BusAuthContext.Provider
+      value={{
+        driver,
+        message,
+        setMessage,
+        isLoggedIn,
+        token,
+        login,
+        logout,
+        setLocation,
+        location,
+      }}
+    >
       {children}
     </BusAuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(BusAuthContext);
+export const useAuth = () => useContext(BusAuthContext);//eslint-disable-line

@@ -25,7 +25,6 @@ module.exports.superAdminLogin = async (req, res) => {
     if (role === 'superadmin') {
       user = await SuperAdmin.findOne({ email });
       userType = 'superadmin';
-      console.log("superadmin user:", user);
     }
     else {
       return res.status(400).json({ error: 'Insufficient Permission' });

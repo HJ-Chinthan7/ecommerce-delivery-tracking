@@ -8,9 +8,10 @@ const authRouter=require('./routes/auth');
 const superAdminRouter=require('./routes/superAdmin');
 const adminRouter=require('./routes/admin');
 const driverRouter=require('./routes/driver');
+const publicTrackingRoutes = require("./routes/tracking");
 
 connectDb=require("./database/db")
-const appOrigin="http://localhost:5174";//process.env.FRONTEND_URL; //
+const appOrigin=process.env.FRONTEND_URL; //"http://localhost:5174";//
 app.use(cors({
   origin: appOrigin,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -24,6 +25,8 @@ app.use('/api/superadmin',superAdminRouter);
 app.use('/api/admin',adminRouter);
 app.use('/api/route',RouteRouter);
 app.use('/api/driver',driverRouter);
+app.use("/api/public-tracking", publicTrackingRoutes);
+
 
   module.exports=app;
  

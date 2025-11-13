@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AdminPanel from "./components/AdminPanel";
 import BusDriverApp from "./components/BusDriverApp";
-import PublicTracking from "./components/PublicTracking";
+import PublicTracking from "./components/PublicBusTracking";
 import Home from "./components/Home";
 import { BusAuthProvider } from "./AuthContext/BusAuthContext";
 import BusDriverLogin from "./components/BusDriverLogin";

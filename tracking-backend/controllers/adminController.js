@@ -78,8 +78,6 @@ module.exports.registerDriver = async (req, res) => {
         const existingDriver = await Driver.findOne({
             $or: [{ driverId }, { email }],
         });
-        console.log("existingDriver:", existingDriver);
-
         if (existingDriver) {
             return res.status(400).json({ error: "Driver with this ID or email already exists" });
         }
