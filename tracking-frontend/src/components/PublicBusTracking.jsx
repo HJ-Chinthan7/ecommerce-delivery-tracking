@@ -4,7 +4,9 @@ import { useParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
+import { publicAPI } from "../services/api";
 
+// fix default icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -34,9 +36,7 @@ const busIcon = new L.Icon({
 const FlyMarker = ({ position }) => {
   const map = useMap();
   useEffect(() => {
-    if (position) {
-      map.flyTo(position, map.getZoom(), { duration: 0.5 });
-    }
+    if (position) map.flyTo(position, map.getZoom(), { duration: 0.5 });
   }, [position, map]);
 
   return (
@@ -55,35 +55,59 @@ const PublicBusTracker = () => {
   const [error, setError] = useState("");
   const trackingIntervalRef = useRef(null);
 
-  useEffect(() => {
-    if (!tracking || !busId) return;
+  const refreshLocation = async () => {
+    if (!busId) {
+      alert("Enter a Bus ID first!");
+      return;
+    }
+    try {
+      const res = await publicAPI.getBusLocationtracking(busId);
+      console.log(" API Response:", res.data);
 
-    console.log("🟢 Tracking started, connecting socket...");
-
-    const socket =socketService.connect();
-   socket.on("connect", () => {
-  console.log(" Socket connected");
-  socketService.joinBusRoom(busId);
-
-  const handleLocationUpdate = (loc) => {
-    console.log("  location update:", loc);
-    if (loc?.lat && loc?.lon) {
-      setBusLocation([loc.lat, loc.lon]);
-      setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
-      setError("");
+      if (res?.data?.success && res.data.location) {
+        const loc = res.data.location;
+        setBusLocation([loc.lat, loc.lon]);
+        setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
+        setError("");
+      } else {
+        setError("Bus not found or no location data.");
+      }
+    } catch (err) {
+      console.error(" Error fetching bus location:", err);
+      setError("Failed to fetch location.");
     }
   };
 
-  socketService.on("bus:location", handleLocationUpdate);
+  useEffect(() => {
+    if (!tracking || !busId) return;
 
-  trackingIntervalRef.current = setInterval(() => {
-    console.log(" Re-listening for location updates...");
-    socketService.off("bus:location");
-    socketService.on("bus:location", handleLocationUpdate);
-  }, 10000);
-});
+    console.log(" Tracking started, connecting socket...");
+    const socket = socketService.connect();
+console.log(" Socket instance:", socket);
+    socket.on("connect", () => {
+      console.log(" Socket connected:", socket.id);
+      socketService.joinBusRoom(busId);
+
+      const handleLocationUpdate = (loc) => {
+        console.log(" location update:", loc);
+        if (loc?.lat && loc?.lon) {
+          setBusLocation([loc.lat, loc.lon]);
+          setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
+          setError("");
+        }
+      };
+
+      socketService.on("bus:location", handleLocationUpdate);
+
+      trackingIntervalRef.current = setInterval(() => {
+        console.log(" Re-listening for location updates...");
+        socketService.off("bus:location");
+        socketService.on("bus:location", handleLocationUpdate);
+      }, 10000);
+    });
+
     return () => {
-      console.log(" Stopping tracking and clearing socke");
+      console.log(" Stopping tracking...");
       clearInterval(trackingIntervalRef.current);
       socketService.leaveBusRoom(busId);
       socketService.off("bus:location");
@@ -95,12 +119,12 @@ const PublicBusTracker = () => {
       alert("Enter a Bus ID first!");
       return;
     }
-
     setTracking((prev) => !prev);
   };
 
   return (
     <div className="flex h-screen">
+     
       <div className="w-1/3 p-4 bg-white shadow-md">
         <h2 className="text-xl font-semibold mb-4">Track Your Bus</h2>
 
@@ -111,6 +135,14 @@ const PublicBusTracker = () => {
           onChange={(e) => setBusId(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+
+       
+        <button
+          onClick={refreshLocation}
+          className="bg-blue-600 text-white py-2 px-4 rounded w-full mb-2"
+        >
+          Refresh Location
+        </button>
 
         <button
           onClick={handleTrackingToggle}
