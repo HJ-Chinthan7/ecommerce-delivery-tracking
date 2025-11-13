@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
-import { trackingAPI } from "../services/api";
+import { publicAPI } from "../services/api";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -66,10 +66,10 @@ const PublicTracking = () => {
     }
 
     socketService.joinBusRoom(busId);
-    console.log("🔗 Joined bus room:", busId);
+    console.log(" Joined bus room:", busId);
 
     socketService.socket.on("bus:location", (loc) => {
-      console.log("📡 Got live location:", loc);
+      console.log(" live location:", loc);
       if (loc?.lat && loc?.lon) {
         setBusLocation([loc.lat, loc.lon]);
         setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
@@ -78,14 +78,14 @@ const PublicTracking = () => {
 
     intervalRef.current = setInterval(async () => {
       try {
-        const res = await trackingAPI.getBusLocation(busId);
+        const res = await publicAPI.getBusLocation(busId);
         if (res.data.success && res.data.location) {
           const { lat, lon, timestamp } = res.data.location;
           setBusLocation([lat, lon]);
           setLastUpdate(new Date(timestamp).toLocaleTimeString());
         }
       } catch (err) {
-        console.error("❌ Polling failed:", err.message);
+        console.error("Polling failed:", err.message);
       }
     }, 10000);
   };
@@ -98,19 +98,19 @@ const PublicTracking = () => {
 
     socketService.leaveBusRoom(busId);
     socketService.socket?.off("bus:location");
-    console.log("🛑 Tracking stopped for:", busId);
+    console.log(" Tracking stopped for:", busId);
   };
 
   const refreshTracking = async () => {
     if (!busId.trim()) return setError("Enter Bus ID first.");
     try {
-      const res = await trackingAPI.getBusLocation(busId);
+      const res = await publicAPI.getBusLocation(busId);
       if (res.data.success && res.data.location) {
         const { lat, lon, timestamp } = res.data.location;
         setBusLocation([lat, lon]);
         setLastUpdate(new Date(timestamp).toLocaleTimeString());
         setError("");
-        console.log("🔁 Refreshed location:", lat, lon);
+        console.log("Refreshed location:", lat, lon);
       } else {
         setError("Bus not found or inactive.");
       }
