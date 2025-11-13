@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
 import { publicAPI } from "../services/api";
 
+// 🧩 Fix Leaflet default icons (prevent missing marker images)
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -16,6 +17,7 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+// 🚌 Custom bus SVG icon
 const busIcon = new L.Icon({
   iconUrl:
     "data:image/svg+xml;base64," +
@@ -30,12 +32,34 @@ const busIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
+// ✈️ FlyMarker component to auto-move map when bus updates
 const FlyMarker = ({ position }) => {
   const map = useMap();
+
   useEffect(() => {
-    if (position) map.flyTo(position, map.getZoom(), { duration: 0.5 });
+    console.log("[FlyMarker] Received position:", position);
+    if (position && Array.isArray(position) && position.length === 2) {
+      console.log("[FlyMarker] Flying to new position:", position);
+      map.flyTo(position, map.getZoom(), { duration: 0.5 });
+    } else {
+      console.warn("[FlyMarker] Invalid position:", position);
+    }
   }, [position, map]);
-  return <Marker position={position} icon={busIcon} />;
+
+  if (!position || !Array.isArray(position) || position.length !== 2) {
+    console.warn("[FlyMarker] Marker not rendered due to invalid position:", position);
+    return null;
+  }
+
+  return (
+    <Marker position={position} icon={busIcon}>
+      <Popup>
+        🚌 Bus Location <br />
+        Lat: {position[0].toFixed(5)} <br />
+        Lon: {position[1].toFixed(5)}
+      </Popup>
+    </Marker>
+  );
 };
 
 const PublicBusTracker = () => {
@@ -45,19 +69,33 @@ const PublicBusTracker = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [error, setError] = useState("");
 
-  
   useEffect(() => {
-    if (!busId) return;
+    console.log("[useEffect] Current busId:", busId);
 
-    if (!socketService.socket || !socketService.socket.connected) {
-      socketService.connect();
+    if (!busId || !socketService.socket) {
+      console.warn("[useEffect] Socket not connected or busId missing");
+      return;
     }
 
+    console.log("[Socket] Joining bus room:", busId);
     socketService.socket.emit("joinBusRoom", { busId });
-    console.log(`Joined bus room: ${busId}`);
 
     const handleLocation = (loc) => {
-      setBusLocation([loc.lat, loc.lon]);
+      console.log("[Socket] Received location from backend:", loc);
+
+      if (!loc || !loc.lat || !loc.lon) {
+        console.error("[Socket] Invalid location payload:", loc);
+        return;
+      }
+
+      const lat = Number(loc.lat);
+      const lon = Number(loc.lon);
+      if (isNaN(lat) || isNaN(lon)) {
+        console.error("[Socket] Invalid lat/lon format:", loc);
+        return;
+      }
+
+      setBusLocation([lat, lon]);
       setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
       setError("");
     };
@@ -65,38 +103,49 @@ const PublicBusTracker = () => {
     socketService.socket.on("bus:location", handleLocation);
 
     return () => {
+      console.log("[Socket] Leaving bus room:", busId);
       socketService.socket.emit("leaveBusRoom", { busId });
       socketService.socket.off("bus:location", handleLocation);
     };
   }, [busId]);
 
- 
   const refreshLocation = async () => {
     if (!busId) return;
+    console.log("[HTTP] Refresh button clicked for bus:", busId);
+
     try {
       const res = await publicAPI.get(`/api/public-tracking/${busId}`);
+      console.log("[HTTP] Response received:", res.data);
+
       if (res.data.success) {
         const loc = res.data.location;
-        setBusLocation([loc.lat, loc.lon]);
-        setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
-        setError("");
-      } else setError("Bus not found");
+        const lat = Number(loc.lat);
+        const lon = Number(loc.lon);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          setBusLocation([lat, lon]);
+          setLastUpdate(new Date(loc.timestamp).toLocaleTimeString());
+          setError("");
+        } else {
+          setError("Invalid coordinates");
+          console.error("[HTTP] Invalid lat/lon in response:", loc);
+        }
+      } else {
+        setError("Bus not found");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("[HTTP] Failed to fetch bus location:", err);
       setError("Failed to fetch bus location");
     }
   };
 
-  
-  useEffect(() => {
-    if (paramBusId && !busId) setBusId(paramBusId);
-  }, [paramBusId]);
+  const defaultCenter = [12.9716, 77.5946];
 
   return (
     <div className="flex h-screen">
       {/* Side panel */}
       <div className="w-1/3 p-4 bg-white shadow-md">
         <h2 className="text-xl font-semibold mb-4">Track Your Bus</h2>
+
         <input
           type="text"
           placeholder="Enter Bus ID"
@@ -104,6 +153,7 @@ const PublicBusTracker = () => {
           onChange={(e) => setBusId(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+
         <button
           onClick={refreshLocation}
           className="bg-blue-600 text-white py-2 px-4 rounded w-full mb-2"
@@ -124,15 +174,18 @@ const PublicBusTracker = () => {
             </p>
           </div>
         )}
+
         {error && <p className="text-red-500 mt-2">{error}</p>}
       </div>
 
-   
+      {/* Map container */}
       <div className="flex-1 m-5">
+        {console.log("[Render] Rendering Map with location:", busLocation)}
         <MapContainer
-          center={busLocation || [12.9716, 77.5946]}
-          zoom={16}
+          center={busLocation || defaultCenter}
+          zoom={18}
           className="h-full w-full"
+          key={busId}
         >
           <TileLayer
             attribution='&copy; OpenStreetMap contributors'
