@@ -6,7 +6,6 @@ import "leaflet/dist/leaflet.css";
 import socketService from "../services/socket";
 import { publicAPI } from "../services/api";
 
-// --- Fix Leaflet icons ---
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -31,7 +30,6 @@ const busIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
-// fly smoothly to new bus location
 const FlyMarker = ({ position, children }) => {
   const map = useMap();
   useEffect(() => {
@@ -97,7 +95,6 @@ const PublicTracking = () => {
   };
 
   const stopTracking = () => {
-    console.log("Stopping tracking for bus:", busId);
     setTracking(false);
     clearInterval(intervalRef.current);
     socketService.emit("leaveBusRoom", { busId });

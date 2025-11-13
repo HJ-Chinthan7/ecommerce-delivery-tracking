@@ -17,24 +17,11 @@ class SocketService {
       reconnectionDelay: 2000,
     });
 
-    this.socket.on("connect", () => {
-      console.log("Socket Connected:", this.socket.id);
-    });
-
-    this.socket.on("disconnect", (reason) => {
-      console.log("Socket Disconnected:", reason);
-    });
-
-    this.socket.on("connect_error", (error) => {
-      console.error("Socke Connection error:", error.message);
-    });
-
     return this.socket;
   }
 
   disconnect() {
     if (this.socket) {
-      console.log("Socket Disconnecting manually");
       this.socket.disconnect();
       this.socket = null;
     }
@@ -42,7 +29,6 @@ class SocketService {
 
   emit(event, data) {
     if (this.socket && this.socket.connected) {
-      console.log(`Socket Emit ${event}:`, data);
       this.socket.emit(event, data);
     } else {
       console.warn(`Socket Emit Failed No active connection for event "${event}"`);
@@ -51,19 +37,16 @@ class SocketService {
 
   on(event, callback) {
     if (this.socket) {
-      console.log(`Socket On Listening for "${event}"`);
       this.socket.on(event, callback);
     }
   }
 
   off(event) {
     if (this.socket) {
-      console.log(`Socket Off Removing listener for "${event}"`);
       this.socket.off(event);
     }
   }
 
-  // Custom helpers
   busDriverLogin(busId) {
     this.emit("busDriverLogin", { busId });
   }
