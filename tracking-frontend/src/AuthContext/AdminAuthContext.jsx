@@ -80,4 +80,4 @@ export const AdminAuthProvider = ({ children }) => {
 }
 
 
-export const useAdminAuth = () => useContext(AdminAuthContext);
+export const useAdminAuth = () => useContext(AdminAuthContext);//eslint-disable-line

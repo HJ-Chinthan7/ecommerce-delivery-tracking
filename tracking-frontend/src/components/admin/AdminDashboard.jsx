@@ -37,15 +37,15 @@ const AdminDashboard = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [driversRes, busesRes, parcelsRes] = await Promise.all([// eslint-disable-line no-unused-vars
+      const [driversRes, busesRes, parcelsRes] = await Promise.all([
         adminAPI.getRegionDrivers(),
         adminAPI.getRegionBuses(),
-       // adminAPI.getRegionParcels(),
+       adminAPI.getRegionParcels(),
       ]); 
 
       setDrivers(driversRes.data.drivers || []);
       setBuses(busesRes.data.buses || []);
-      //setParcels(parcelsRes.data.parcels || []);
+      setParcels(parcelsRes.data.parcels || []);
     } catch (error) {
       console.error("Error loading data:", error);
       setMessage("Error loading data");

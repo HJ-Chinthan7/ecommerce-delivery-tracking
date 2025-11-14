@@ -90,7 +90,6 @@ const Home = () => {
             </button>
           </div>
 
-          {/* Parcel Assigner */}
           <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col items-center">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
               <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +101,7 @@ const Home = () => {
               Assign parcels to buses quickly and efficiently.
             </p>
             <Link
-              to="/assign-parcel"
+              to="/assigner-login"
               className="bg-blue-600 text-white py-2 px-5 rounded-lg hover:bg-blue-700 transition"
             >
               Go to Assigner

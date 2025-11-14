@@ -7,6 +7,9 @@ import { BusAuthProvider } from "./AuthContext/BusAuthContext";
 import BusDriverLogin from "./components/BusDriverLogin";
 import AdminRoutes from "./routes/AdminRoutes";
 import { AdminAuthProvider } from "./AuthContext/AdminAuthContext";
+import { AssignerAuthProvider } from "./AuthContext/AssignerAuthContext";
+import AssignerLogin from "./components/parcel assigner/AssignerLogin";
+import Assigner from "./components/parcel assigner/Assignment ";
 function App() {
   return (
     <Router>
@@ -32,6 +35,15 @@ function App() {
             <BusDriverApp />
             </BusAuthProvider>} />
           <Route path="/track/:parcelId" element={<PublicTracking />} />
+           <Route path="/assigner-login" element={
+             <AssignerAuthProvider>
+            <AssignerLogin />
+            </AssignerAuthProvider>} />
+
+             <Route path="/assigner" element={
+             <AssignerAuthProvider>
+            <Assigner />
+            </AssignerAuthProvider>} />
         </Routes>
       </div>
     </Router>

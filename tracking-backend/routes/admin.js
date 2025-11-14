@@ -18,8 +18,8 @@ router.get("/getRegionDrivers", authenticateAdmin, AdminController.getRegionDriv
 
 router.get("/getRegionBuses", authenticateAdmin, AdminController.getRegionBuses);
 
-//implement parcel and then this
-//router.get("/getRegionParcels", authenticateAdmin, AdminController.getRegionParcels);
+
+router.get("/getRegionParcels", authenticateAdmin, AdminController.getRegionParcels);
 
 
 

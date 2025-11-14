@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const Admin = require("../models/Admin");
+const Parcel=require('../models/Parcel');
 const Driver = require("../models/Driver")
 const Bus = require('../models/Bus');
 const mongoose = require('mongoose');
@@ -146,27 +147,24 @@ module.exports.getRegionBuses = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
-//remove after implementation
-/*
+
+
 module.exports.getRegionParcels=async (req, res) => {
   try {
     const regionId = req.user.regionId;
 
-    const buses = await Bus.find({ regionId });
-    const busIds = buses.map((bus) => bus.busId);
-
-
-   // const parcels = await Parcel.find({ busId: { $in: busIds } });
+   const parcels = await Parcel.find({ _id:regionId });
 
     res.json({
       success: true,
-     // parcels,
+     parcels,
     });
+
   } catch (error) {
     console.error("Get region parcels error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-} */
+} 
 
 module.exports.assignBus = async (req, res) => {
     try {

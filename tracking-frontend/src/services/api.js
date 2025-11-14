@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL|| 'http://localhost:5002/api'; // 
+const API_BASE_URL = 'http://localhost:5002/api'; // import.meta.env.VITE_APP_BASE_URL|| 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, 
   headers: {
     'Content-Type': 'application/json',
   },
@@ -42,7 +43,7 @@ export const adminAPI = {
   adminLogout: () => api.post('/admin/adminLogout'),
   getRegionDrivers: () => api.get('/admin/getRegionDrivers'),
   getRegionBuses: () => api.get('/admin/getRegionBuses'),
-  //getRegionParcels: () => api.get('/admin/getRegionParcels'),
+  getRegionParcels: () => api.get('/admin/getRegionParcels'),
   registerDriver: (driverData) => api.post('/admin/registerDriver', driverData),
   assignBus: (assignmentData) => api.put('/admin/assign-bus', assignmentData),
   createRoute: (routeData) => api.post('/route/createRoute', routeData),
@@ -61,4 +62,14 @@ export const driverAPI = {
 
 export const publicAPI = {
   getBusLocationtracking: (busId) => api.get(`/public-tracking/getBusLocationtracking/${busId}`),
+};
+
+export const assignerAPI = {
+  login: (credentials) => api.post('/assigner/assignerLogin', credentials),
+  logout: () => api.post('/assigner/assignerLogout'),
+  assignParcel: (parcelData) => api.post('/assigner/assignParcel', parcelData),
+  getParcels: () => api.get('/assigner/getParcels'),
+  getRegions: () => api.get('/assigner/regions'),
+  reassignParcel: (parcelData) => api.post('/assigner/reassignParcel', parcelData),
+  getReassignParcels: () => api.get('/assigner/parcels/reassign'),
 };
