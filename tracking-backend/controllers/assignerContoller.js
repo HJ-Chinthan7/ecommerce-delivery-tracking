@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const Assigner = require("../models/Assigner");
 const axios = require("axios");
 const Region = require("../models/Region");
-const Parcel = require("../models/parcel");
+const Parcel = require("../models/Parcel");
 const generateAssignerToken = require("../utils/generateAsToken");
 
 
