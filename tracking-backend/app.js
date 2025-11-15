@@ -11,7 +11,7 @@ const driverRouter=require('./routes/driver');
 const publicTrackingRoutes = require("./routes/tracking");
 const assignerRouter=require('./routes/assignerRoutes');
 connectDb=require("./database/db")
-const appOrigin=process.env.FRONTEND_URL;"http://localhost:5174";// //
+const appOrigin=process.env.FRONTEND_URL;//"http://localhost:5174";//
 app.use(cors({
   origin: appOrigin,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

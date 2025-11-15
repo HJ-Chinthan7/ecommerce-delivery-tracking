@@ -4,7 +4,7 @@ const Admin = require("../models/Admin");
 const Driver = require("../models/Driver")
 const Bus = require('../models/Bus');
 const generateAdminToken = require('../utils/generateAToken');
-const Parcel = require("../models/parcel");
+const Parcel = require("../models/Parcel");
 module.exports.AdminLogin = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
