@@ -1,12 +1,10 @@
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const Admin = require("../models/Admin");
-const Parcel=require('../models/Parcel');
 const Driver = require("../models/Driver")
 const Bus = require('../models/Bus');
-const mongoose = require('mongoose');
 const generateAdminToken = require('../utils/generateAToken');
-
+const Parcel = require("../models/parcel");
 module.exports.AdminLogin = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -136,7 +134,7 @@ module.exports.getRegionBuses = async (req, res) => {
         const regionId = req.user.regionId;
 
         const buses = await Bus.find({ regionId })
-            .populate("regionId", "name").populate("driverId", "name email _id").populate("routeId", "name code _id");
+            .populate("regionId", "name").populate("driverId", "name email _id").populate("routeId", "name _id description routeId");
 
         res.json({
             success: true,
@@ -153,8 +151,8 @@ module.exports.getRegionParcels=async (req, res) => {
   try {
     const regionId = req.user.regionId;
 
-   const parcels = await Parcel.find({ _id:regionId });
-
+   const parcels = await Parcel.find({ region:regionId });
+console.log(parcels)
     res.json({
       success: true,
      parcels,
@@ -214,68 +212,6 @@ module.exports.assignBus = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
-//asigning parcell code
-/*module.exports.assignParcel= async (req, res) => {
-  try {
-    const { parcelId, orderId, busId } = req.body;
-
-    if (!parcelId || !orderId || !busId) {
-      return res.status(400).json({ error: 'parcelId, orderId, and busId are required' });
-    }
-
-    // Check if bus exists
-    const bus = await Bus.findOne({ busId });
-    if (!bus) {
-      return res.status(404).json({ error: 'Bus not found' });
-    }
-
-    // Create or update parcel
-    let parcel = await Parcel.findOne({ parcelId });
-    if (!parcel) {
-      parcel = new Parcel({
-        parcelId,
-        orderId,
-        busId,
-        status: 'assigned'
-      });
-    } else {
-      parcel.busId = busId;
-      parcel.status = 'assigned';
-    }
-
-    // Generate tracking link
-    const trackingLink = `http://localhost:5173/track/${parcelId}`;
-    parcel.trackingLink = trackingLink;
-
-    await parcel.save();
-
-    // Add parcel to bus
-    if (!bus.parcels.includes(parcelId)) {
-      bus.parcels.push(parcelId);
-      await bus.save();
-    }
-
-    // Call ecommerce API to update order with tracking link
-    try {
-      await axios.post(`${config.ECOMMERCE_API_URL}/orders/${orderId}/tracking`, {
-        trackingLink
-      });
-    } catch (apiError) {
-      console.error('Failed to update ecommerce API:', apiError.message);
-      // Continue anyway - the parcel is still assigned
-    }
-
-    res.json({
-      success: true,
-      parcelId,
-      trackingLink,
-      message: 'Parcel assigned successfully'
-    });
-  } catch (error) {
-    console.error('Assign parcel error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-}  */
 
 module.exports.AdminLogout = async (req, res) => {
     try {
@@ -285,4 +221,104 @@ module.exports.AdminLogout = async (req, res) => {
         console.error("Error during logout:", error);
         res.status(500).json({ success: false, error: "Server error" });
     }
+};
+
+
+module.exports.assignBusToParcels = async (req, res) => {
+  try {
+    const { parcelIds, busId } = req.body;
+    if (!parcelIds || !busId) return res.status(400).json({ message: "parcelIds and busId are required" });
+
+    const updatedParcels = await Parcel.updateMany(
+      { _id: { $in: parcelIds } },
+      { busId, status: "assigned" },
+      { new: true }
+    );
+
+    await Bus.findByIdAndUpdate(
+      busId,
+      { $addToSet: { parcels: { $each: parcelIds } } }
+    );
+
+    res.json({ success: true, message: "Parcels assigned to bus successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports.unassignParcelsFromBus = async (req, res) => {
+  try {
+    const { parcelIds } = req.body;
+    if (!parcelIds) return res.status(400).json({ message: "parcelIds are required" });
+
+    const parcelsToUnassign = await Parcel.find({
+      _id: { $in: parcelIds },
+      status: { $nin: ["in_transit", "delivered"] }
+    });
+
+    const parcelIdsToUpdate = parcelsToUnassign.map(p => p._id);
+
+    await Parcel.updateMany(
+      { _id: { $in: parcelIdsToUpdate } },
+      { busId: null, status: "unassigned" }
+    );
+
+    await Bus.updateMany(
+      { parcels: { $in: parcelIdsToUpdate } },
+      { $pull: { parcels: { $in: parcelIdsToUpdate } } }
+    );
+
+    res.json({ success: true, message: "Parcels unassigned successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports.removeParcelsRegion = async (req, res) => {
+  try {
+    const { parcelIds } = req.body;
+    if (!parcelIds) return res.status(400).json({ message: "parcelIds are required" });
+
+    await Parcel.updateMany(
+      { _id: { $in: parcelIds } },
+      { $unset: { region: "" }, status: "pending" }
+    );
+
+    res.json({ success: true, message: "Region removed from selected parcels" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports.getUnassignedParcels = async (req, res) => {
+  try {
+    const parcels = await Parcel.find({ status: { $in: ["pending", "unassigned"] } });
+    res.json(parcels);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports.getAssignedParcels = async (req, res) => {
+  try {
+    const parcels = await Parcel.find({ status: "assigned" });
+    res.json(parcels);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports.getAddressChangedParcels = async (req, res) => {
+  try {
+    const parcels = await Parcel.find({ isAddressChanged: true });
+    res.json(parcels);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };

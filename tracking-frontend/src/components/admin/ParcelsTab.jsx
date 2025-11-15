@@ -1,9 +1,26 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const  ParcelsTab=({ parcels })=> {
+const ParcelsTab = ({ parcels }) => {
+  const navigate = useNavigate();
+
+  const goToAssigner = () => {
+    navigate("/parcel-assigner"); 
+  };
+
   return (
     <div className="py-8">
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Region Parcels ({parcels.length})</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Region Parcels ({parcels.length})</h3>
+          <button
+            onClick={goToAssigner}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Go to Parcel Assigner
+          </button>
+        </div>
+
         {parcels.length === 0 ? (
           <p className="text-gray-500">No parcels in your region</p>
         ) : (
@@ -20,8 +37,8 @@ const  ParcelsTab=({ parcels })=> {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {parcels.map((parcel) => (
-                  <tr key={parcel.parcelId || parcel._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{parcel.parcelId}</td>
+                  <tr key={parcel._id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{parcel._id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parcel.orderId}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parcel.busId || 'N/A'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -36,7 +53,9 @@ const  ParcelsTab=({ parcels })=> {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {parcel.trackingLink ? (
-                        <a href={parcel.trackingLink} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800">Track Parcel</a>
+                        <a href={parcel.trackingLink} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800">
+                          Track Parcel
+                        </a>
                       ) : 'N/A'}
                     </td>
                   </tr>
@@ -48,5 +67,6 @@ const  ParcelsTab=({ parcels })=> {
       </div>
     </div>
   );
-}
+};
+
 export default ParcelsTab;

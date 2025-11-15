@@ -10,6 +10,7 @@ import { AdminAuthProvider } from "./AuthContext/AdminAuthContext";
 import { AssignerAuthProvider } from "./AuthContext/AssignerAuthContext";
 import AssignerLogin from "./components/parcel assigner/AssignerLogin";
 import Assigner from "./components/parcel assigner/Assignment ";
+import ParcelAssignerPageWithTabs from './components/admin/ParcelAssignerPageWithTabs'
 function App() {
   return (
     <Router>
@@ -43,6 +44,10 @@ function App() {
              <Route path="/assigner" element={
              <AssignerAuthProvider>
             <Assigner />
+            </AssignerAuthProvider>} />
+            <Route path="/parcel-assigner" element={
+             <AssignerAuthProvider>
+            <ParcelAssignerPageWithTabs />
             </AssignerAuthProvider>} />
         </Routes>
       </div>
