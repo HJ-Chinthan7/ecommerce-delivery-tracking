@@ -21,7 +21,7 @@ module.exports.loginAssigner = async (req, res) => {
         res.cookie('token', token, {
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000
         });
 
@@ -41,7 +41,7 @@ module.exports.logoutAssigner = async (req, res) => {
      res.cookie('token', '', {
         httpOnly: true,
         expires: new Date(0), 
-        sameSite: 'Strict',  
+        sameSite: 'none',  
         secure: process.env.NODE_ENV === 'production', 
     });
 
