@@ -4,7 +4,8 @@ const Admin = require("../models/Admin");
 const Driver = require("../models/Driver")
 const Bus = require('../models/Bus');
 const generateAdminToken = require('../utils/generateAToken');
-const Parcel = require("../models/Parcel");
+const Parcel = require("../models/parcel");
+const mongoose=require('mongoose')
 module.exports.AdminLogin = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -152,7 +153,6 @@ module.exports.getRegionParcels=async (req, res) => {
     const regionId = req.user.regionId;
 
    const parcels = await Parcel.find({ region:regionId });
-console.log(parcels)
     res.json({
       success: true,
      parcels,
@@ -227,12 +227,19 @@ module.exports.AdminLogout = async (req, res) => {
 module.exports.assignBusToParcels = async (req, res) => {
   try {
     const { parcelIds, busId } = req.body;
-    if (!parcelIds || !busId) return res.status(400).json({ message: "parcelIds and busId are required" });
-
-    const updatedParcels = await Parcel.updateMany(
+    if (!parcelIds || !busId) {
+      return res.status(400).json({ message: "parcelIds and busId are required" });
+    }
+    await Parcel.updateMany(
       { _id: { $in: parcelIds } },
-      { busId, status: "assigned" },
-      { new: true }
+      {
+        busId,
+        status: "assigned",
+        $set: {
+          isDispatched: false,
+          isAddressChanged: false
+        }
+      }
     );
 
     await Bus.findByIdAndUpdate(
@@ -240,41 +247,69 @@ module.exports.assignBusToParcels = async (req, res) => {
       { $addToSet: { parcels: { $each: parcelIds } } }
     );
 
-    res.json({ success: true, message: "Parcels assigned to bus successfully" });
+    res.json({
+      success: true,
+      message: "Parcels assigned to bus successfully"
+    });
+
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
   }
 };
 
 module.exports.unassignParcelsFromBus = async (req, res) => {
   try {
     const { parcelIds } = req.body;
-    if (!parcelIds) return res.status(400).json({ message: "parcelIds are required" });
+    if (!parcelIds) {
+      return res.status(400).json({ message: "parcelIds are required" });
+    }
 
-    const parcelsToUnassign = await Parcel.find({
+   
+    const parcels = await Parcel.find({
       _id: { $in: parcelIds },
-      status: { $nin: ["in_transit", "delivered"] }
+      status: { $nin: ["in_transit", "delivered"] },
+      isDispatched: false  
     });
 
-    const parcelIdsToUpdate = parcelsToUnassign.map(p => p._id);
+    if (parcels.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot unassign. Parcel may be dispatched, in-transit, or delivered."
+      });
+    }
+
+    const validIds = parcels.map(p => p._id);
 
     await Parcel.updateMany(
-      { _id: { $in: parcelIdsToUpdate } },
-      { busId: null, status: "unassigned" }
+      { _id: { $in: validIds } },
+      {
+        busId: null,
+        status: "unassigned",
+        isAddressChanged: false  
+      }
     );
 
     await Bus.updateMany(
-      { parcels: { $in: parcelIdsToUpdate } },
-      { $pull: { parcels: { $in: parcelIdsToUpdate } } }
+      { parcels: { $in: validIds } },
+      { $pull: { parcels: { $in: validIds } } }
     );
 
-    res.json({ success: true, message: "Parcels unassigned successfully" });
+    res.json({
+      success: true,
+      message: "Parcels unassigned successfully",
+      unassignedCount: validIds.length
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 module.exports.removeParcelsRegion = async (req, res) => {
   try {
@@ -295,30 +330,49 @@ module.exports.removeParcelsRegion = async (req, res) => {
 
 module.exports.getUnassignedParcels = async (req, res) => {
   try {
-    const parcels = await Parcel.find({ status: { $in: ["pending", "unassigned"] } });
-    res.json(parcels);
+    const regionId = req.params.regionId;
+
+    const parcels = await Parcel.find({
+      region: regionId,
+      status: { $in: ["pending", "unassigned"] }
+    });
+
+    return res.json(parcels);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
+
 module.exports.getAssignedParcels = async (req, res) => {
   try {
-    const parcels = await Parcel.find({ status: "assigned" });
-    res.json(parcels);
+    const regionId = req.params.regionId;
+
+    const parcels = await Parcel.find({
+      region: regionId,
+      status: "assigned"
+    });
+
+    return res.json(parcels);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 module.exports.getAddressChangedParcels = async (req, res) => {
   try {
-    const parcels = await Parcel.find({ isAddressChanged: true });
-    res.json(parcels);
+    const regionId = req.params.regionId;
+
+    const parcels = await Parcel.find({
+      region: regionId,
+      isAddressChanged: true
+    });
+
+    return res.json(parcels);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };

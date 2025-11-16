@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const Assigner = require("../models/Assigner");
 const axios = require("axios");
 const Region = require("../models/Region");
-const Parcel = require("../models/Parcel");
+const Parcel = require("../models/parcel");
 const generateAssignerToken = require("../utils/generateAsToken");
 
 
@@ -45,9 +45,8 @@ module.exports.logoutAssigner = async (req, res) => {
 module.exports.getExternalOrders = async (req, res) => {
 
     try {
-        const response = await axios.get("http://localhost:5000/api/orders/trackingcall-for-order");
+        const response = await axios.get("https://ecomm-doit.onrender.com/api/orders/trackingcall-for-order");
         res.json(response?.data || []);
-        console.log(response.data)
         
     } catch (err) {
         console.error(err);
@@ -86,10 +85,9 @@ module.exports.assignParcel = async (req, res) => {
         for (const orderId of orderIds) {
 
             const response = await axios.get(
-                `http://localhost:5000/api/orders/orderbyid/${orderId}`
+                `https://ecomm-doit.onrender.com/api/orders/orderbyid/${orderId}`
             );
-            console.log(response.data);
-            const order = response.data;
+            const order = response.data.order;
             if (!order) {
                 continue;
             }
@@ -140,14 +138,11 @@ module.exports.assignParcel = async (req, res) => {
 
 
             parcels.push(parcel);
-            console.log(parcels);
-            const updateResponse = axios.patch(`http://localhost:5000/api/orders/order-parcelid-update/${order._id}`, {
+            const updateResponse = await axios.patch(`https://ecomm-doit.onrender.com/api/orders/order-parcelid-update/${order._id}`, {
                 parcelId: parcel._id
             });
 
-
-
-            if (updateResponse.data?.parcelId !== parcel._id.toString()) {
+            if (updateResponse.data?.order?.parcelId !== parcel._id.toString()) {
                 console.log("Parcel ID mismatch while updating external server");
             }
         }
@@ -191,14 +186,90 @@ module.exports.reassignParcel = async (req, res) => {
 };
 
 
+
+
 module.exports.getReassignParcels = async (req, res) => {
-    try {
-        const parcels = await Parcel.find({ $or: [{ isAddressChanged: true }, { isDispatched: false }] })
-            .populate("user", "name email");
-        res.json(parcels);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to fetch reassign parcels" });
+  try {
+    const parcels = await Parcel.find({
+      $or: [
+        { region: { $exists: false } },
+        { region: null }
+      ]
+    });
+    if (!parcels || parcels.length === 0) {
+      return res.json({ list: [], message: "No parcels to reassign" });
     }
+    const results = await Promise.all(
+      parcels.map(async (parcel) => {
+        let order = null;
+
+        if (parcel.orderId) {
+          const ORDER_API = `https://ecomm-doit.onrender.com/api/orders/orderbyid/${parcel.orderId}`;
+          try {
+            const orderRes = await axios.get(ORDER_API);
+            order = orderRes.data.order;
+          } catch (err) {
+            console.log("Order API failed for id:", parcel.orderId, err.message);
+          }
+        }
+
+        return {
+          parcel,
+          order
+        };
+      })
+    );
+    return res.json({
+      count: results.length,
+      list: results,
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+module.exports.updateParcelAdress = async (req, res) => {
+  try {
+    const parcelId = req.params.id;
+
+    let parcel = await Parcel.findById(parcelId);
+    if (!parcel) return res.status(404).json({ message: "Parcel not found" });
+
+    parcel.shippingAddress = {
+      ...parcel.shippingAddress,
+      ...req.body.shippingAddress,
+    };
+    (parcel.busId)?
+    parcel.isAddressChanged = true:
+    parcel.isAddressChanged = false; 
+    parcel.region = parcel.region ?? null;
+
+    await parcel.save();
+
+    return res.json(parcel);
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+module.exports.getParcelById = async (req, res) => {
+  try {
+    const parcelId = req.params.id;
+
+    const parcel = await Parcel.findById(parcelId);
+
+    if (!parcel) {
+      return res.status(404).json({ message: "Parcel not found" });
+    }
+
+    res.json(parcel);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 

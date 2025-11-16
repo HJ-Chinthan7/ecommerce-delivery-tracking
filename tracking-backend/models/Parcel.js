@@ -42,7 +42,6 @@ const parcelSchema = new mongoose.Schema(
     region: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Region",
-      required: true,
     },
 
     busId: {

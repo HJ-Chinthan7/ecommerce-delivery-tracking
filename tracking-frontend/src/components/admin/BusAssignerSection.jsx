@@ -3,7 +3,7 @@ import ParcelBusCard from "./ParcelBusCard";
 
 const BusAssignerSection = ({ buses, selectedBus, onSelectBus, search, setSearch }) => {
   return (
-    <div className="flex-1 max-h-[300px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
+    <div className="flex-1 max-h-[500px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
       <input
         type="text"
         placeholder="Search buses..."

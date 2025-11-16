@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL|| 'http://localhost:5002/api'; // 
+const API_BASE_URL =  import.meta.env.VITE_APP_BASE_URL|| 'http://localhost:5002/api';// 
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -42,8 +42,8 @@ export const adminAPI = {
   adminLogin: (credentials) => api.post('/admin/adminLogin', credentials),
   adminLogout: () => api.post('/admin/adminLogout'),
   getRegionDrivers: () => api.get('/admin/getRegionDrivers'),
-  getRegionBuses: () => api.get('/admin/getRegionBuses'),
-  getRegionParcels: () => api.get('/admin/getRegionParcels'),
+  getRegionBuses: (regionId) => api.get(`/admin/getRegionBuses/${regionId}`),
+  getRegionParcels: (regionId) => api.get(`/admin/getRegionParcels/${regionId}`),
   registerDriver: (driverData) => api.post('/admin/registerDriver', driverData),
   assignBus: (assignmentData) => api.put('/admin/assign-bus', assignmentData),
   createRoute: (routeData) => api.post('/route/createRoute', routeData),
@@ -62,9 +62,9 @@ export const adminAPI = {
   removeParcelsRegion: ({ parcelIds }) =>
     api.patch('/admin/remove-region', { parcelIds }),
 
-  getUnassignedParcels: () => api.get("/admin/parcels/unassigned"),
-  getAssignedParcels: () => api.get("/admin/parcels/assigned"),
-  getAddressChangedParcels: () => api.get("/admin/parcels/address-changed"),
+  getUnassignedParcels: (regionId) => api.get(`/admin/parcels/unassigned/${regionId}`),
+  getAssignedParcels: (regionId) => api.get(`/admin/parcels/assigned/${regionId}`),
+  getAddressChangedParcels: (regionId) => api.get(`/admin/parcels/address-changed/${regionId}`),
   
 };
 
@@ -85,6 +85,7 @@ export const assignerAPI = {
   getParcels: () => api.get('/assigner/getParcels'),
   getRegions: () => api.get('/assigner/regions'),
   getReassignParcels: () => api.get('/assigner/parcels/reassign'),
+  reassignParcel:(parcelData) => api.post('/assigner/reassignParcel', parcelData),
 
 };
 

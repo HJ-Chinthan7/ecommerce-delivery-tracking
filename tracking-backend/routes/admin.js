@@ -13,9 +13,9 @@ router.post("/registerDriver", authenticateAdmin, AdminController.registerDriver
 
 router.get("/getRegionDrivers", authenticateAdmin, AdminController.getRegionDrivers);
 
-router.get("/getRegionBuses", authenticateAdmin, AdminController.getRegionBuses);
+router.get("/getRegionBuses/:regionId", authenticateAdmin, AdminController.getRegionBuses);
 
-router.get("/getRegionParcels", authenticateAdmin, AdminController.getRegionParcels);
+router.get("/getRegionParcels/:regionId", authenticateAdmin, AdminController.getRegionParcels);
 
 router.put("/assign-bus", authenticateAdmin, AdminController.assignBus);
 
@@ -25,11 +25,11 @@ router.patch("/unassign-bus", authenticateAdmin, AdminController.unassignParcels
 
 router.patch("/remove-region", authenticateAdmin, AdminController.removeParcelsRegion);
 
-router.get("/parcels/unassigned", authenticateAdmin, AdminController.getUnassignedParcels);
+router.get("/parcels/unassigned/:regionId", authenticateAdmin, AdminController.getUnassignedParcels);
 
-router.get("/parcels/assigned", authenticateAdmin, AdminController.getAssignedParcels);
+router.get("/parcels/assigned/:regionId", authenticateAdmin, AdminController.getAssignedParcels);
 
-router.get("/parcels/address-changed", authenticateAdmin, AdminController.getAddressChangedParcels);
+router.get("/parcels/address-changed/:regionId", authenticateAdmin, AdminController.getAddressChangedParcels);
 
 router.post("/AdminLogout",authenticateAdmin, AdminController.AdminLogout);
 module.exports=router;

@@ -3,8 +3,12 @@ import ParcelCard from './ParcelCard'
 import BusAssignerSection from './BusAssignerSection'
 import TabsContainer from './TabsContainer'
 import { adminAPI } from "../../services/api";
+import { useLocation } from "react-router-dom";
 
 const ParcelAssignerPageWithTabs = () => {
+  
+  const location = useLocation();
+  const regionId = location.state?.regionId;
   const [unassignedParcels, setUnassignedParcels] = useState([]);
   const [assignedParcels, setAssignedParcels] = useState([]);
   const [addressChangedParcels, setAddressChangedParcels] = useState([]);
@@ -26,10 +30,10 @@ const ParcelAssignerPageWithTabs = () => {
     try {
       const [unassignedRes, assignedRes, addressChangedRes, busesRes] =
         await Promise.all([
-          adminAPI.getUnassignedParcels(),
-          adminAPI.getAssignedParcels(),
-          adminAPI.getAddressChangedParcels(),
-          adminAPI.getRegionBuses(),
+          adminAPI.getUnassignedParcels(regionId),
+          adminAPI.getAssignedParcels(regionId),
+          adminAPI.getAddressChangedParcels(regionId),
+          adminAPI.getRegionBuses(regionId),
         ]);
 
       setUnassignedParcels(
@@ -120,7 +124,7 @@ const ParcelAssignerPageWithTabs = () => {
             return (
               <div className="flex flex-col gap-4">
                 <div className="flex gap-6">
-                  <div className="flex-1 max-h-[300px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
+                  <div className="flex-1 max-h-[500px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
                     <input
                       type="text"
                       placeholder="Search parcels..."

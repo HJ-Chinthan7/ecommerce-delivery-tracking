@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { assignerAPI } from "../../services/api";
 import { useAssignerAuth } from "../../AuthContext/AssignerAuthContext";
+import ReassignPanel from "./ReassignPanel ";
 
 const Assignment = () => {
-  const { token, assigner, logout } = useAssignerAuth();//eslint-disable-line
+  const { token, assigner, logout } = useAssignerAuth(); //eslint-disable-line
+
   const [orders, setOrders] = useState([]);
   const [regions, setRegions] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState(null);
+
   const [reassignList, setReassignList] = useState([]);
+  const [showReassign, setShowReassign] = useState(false);
   const [selectedReassign, setSelectedReassign] = useState([]);
+
   const [filters, setFilters] = useState({ city: "", district: "", state: "", address: "" });
   const [loading, setLoading] = useState(false);
 
@@ -41,8 +46,9 @@ const Assignment = () => {
 
   const fetchReassignList = async () => {
     try {
-      const { data } = await assignerAPI.getReassignParcels();
-      setReassignList(Array.isArray(data) ? data : []);
+      const response = await assignerAPI.getReassignParcels();
+      const list = response?.data?.list || [];
+      setReassignList(list);
     } catch (err) {
       console.error(err);
       setReassignList([]);
@@ -51,10 +57,6 @@ const Assignment = () => {
 
   const toggleOrder = (id) => {
     setSelectedOrders(prev => prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]);
-  };
-
-  const toggleReassign = (id) => {
-    setSelectedReassign(prev => prev.includes(id) ? prev.filter(o => o !== id) : [...prev, id]);
   };
 
   const filterOrders = (orderList) => {
@@ -92,6 +94,7 @@ const Assignment = () => {
       await assignerAPI.reassignParcel({ parcelIds: selectedReassign, regionId: selectedRegion });
       setReassignList(prev => prev.filter(p => !selectedReassign.includes(p._id)));
       setSelectedReassign([]);
+      setShowReassign(false);
     } catch (err) {
       console.error(err);
       alert("Failed to reassign parcels");
@@ -101,17 +104,11 @@ const Assignment = () => {
 
   return (
     <div className="p-4 flex flex-col h-screen bg-gray-100">
-     
+
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Welcome, {assigner?.name}</h1>
-        <button
-          onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-        >
-          Logout
-        </button>
+        <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
       </div>
-
 
       <div className="flex gap-2 mb-4">
         {["city", "district", "state", "address"].map(f => (
@@ -126,8 +123,8 @@ const Assignment = () => {
         ))}
       </div>
 
-      <div className="flex flex-1 gap-4 overflow-hidden">
-       
+      <div className="flex gap-4 h-[90%] overflow-hidden">
+
         <div className="flex-1 bg-white rounded shadow p-4 overflow-y-auto">
           <h2 className="font-bold mb-2">Assign Orders</h2>
           {filterOrders(orders).map(order => (
@@ -136,20 +133,18 @@ const Assignment = () => {
               onClick={() => toggleOrder(order._id)}
               className={`border p-3 mb-2 rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all ${
                 selectedOrders.includes(order._id) ? "bg-blue-100" : ""
-              } ${order.isAddressChanged ? "border-red-500" : ""}`}
+              }`}
             >
               <p className="font-semibold">UserName:{order.user?.username || "Unknown"}</p>
-              <p><strong>Address:</strong> {order.shippingAddress?.address} </p>
+              <p><strong>Address:</strong> {order.shippingAddress?.address}</p>
               <p><strong>District:</strong> {order.shippingAddress?.district}</p>
               <p><strong>City:</strong> {order.shippingAddress?.city}</p>
               <p><strong>State:</strong> {order.shippingAddress?.state}</p>
               <p><strong>Items:</strong> {order.orderItems?.map(i => i.name).join(", ")}</p>
-              {order.isAddressChanged && <p className="text-red-500 text-sm">Address Changed</p>}
             </div>
           ))}
         </div>
 
-       
         <div className="w-64 flex flex-col gap-3">
           <h2 className="font-bold mb-2 text-center">Regions</h2>
           {regions.map(region => (
@@ -166,46 +161,37 @@ const Assignment = () => {
         </div>
       </div>
 
-    
-      <div className="mt-4 flex flex-col gap-4">
-        <button
-          onClick={handleAssign}
-          className={`bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition ${
-            loading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={loading}
-        >
-          {loading ? "Assigning..." : "Assign Selected Orders"}
-        </button>
+      <button
+        onClick={handleAssign}
+        className={`mt-4 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        disabled={loading}
+      >
+        {loading ? "Assigning..." : "Assign Selected Orders"}
+      </button>
 
-        <div className="flex flex-col bg-white rounded shadow p-4 overflow-y-auto max-h-64">
-          <h2 className="font-bold mb-2">Parcels Needing Reassignment</h2>
-          {reassignList.map(parcel => (
-            <div
-              key={parcel._id}
-              onClick={() => toggleReassign(parcel._id)}
-              className={`border p-3 mb-2 rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-all ${
-                selectedReassign.includes(parcel._id) ? "bg-yellow-100" : ""
-              } ${parcel.isAddressChanged ? "border-red-500" : ""}`}
-            >
-              <p className="font-semibold">{parcel.user?.name || "Unknown"}</p>
-              <p>{parcel.shippingAddress?.address}, {parcel.shippingAddress?.district}</p>
-              <p>{parcel.shippingAddress?.city}, {parcel.shippingAddress?.state}</p>
-              <p>Items: {parcel.items?.map(i => i.name).join(", ")}</p>
-              {parcel.isAddressChanged && <p className="text-red-500 text-sm">Address Changed</p>}
-            </div>
-          ))}
-          <button
-            onClick={handleReassign}
-            className={`bg-green-600 text-white p-2 rounded hover:bg-green-700 transition ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={loading}
-          >
-            {loading ? "Reassigning..." : "Reassign Selected Parcels"}
-          </button>
-        </div>
-      </div>
+      <button
+        onClick={() => setShowReassign(true)}
+        className="fixed bottom-4 right-4 bg-yellow-500 text-black px-4 py-2 rounded shadow-lg hover:bg-yellow-600 transition"
+      >
+        Reassign Parcels ({reassignList.length})
+      </button>
+
+      {showReassign && (
+        <ReassignPanel
+          parcels={reassignList}
+          regions={regions}
+          selectedParcels={selectedReassign}
+          setSelectedParcels={setSelectedReassign}
+          selectedRegion={selectedRegion}
+          setSelectedRegion={setSelectedRegion}
+          onClose={() => setShowReassign(false)}
+          onReassign={handleReassign}
+          loading={loading}
+          onRefresh={fetchReassignList} 
+        />
+      )}
     </div>
   );
 };

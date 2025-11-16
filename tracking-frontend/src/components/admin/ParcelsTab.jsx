@@ -5,9 +5,10 @@ const ParcelsTab = ({ parcels }) => {
   const navigate = useNavigate();
 
   const goToAssigner = () => {
-    navigate("/parcel-assigner"); 
+    navigate("/parcel-assigner", {
+    state: { regionId: parcels[0]?.region }
+  });
   };
-
   return (
     <div className="py-8">
       <div className="bg-white shadow rounded-lg p-6">
@@ -32,7 +33,7 @@ const ParcelsTab = ({ parcels }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bus ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Link</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Link ID</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -52,8 +53,8 @@ const ParcelsTab = ({ parcels }) => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {parcel.trackingLink ? (
-                        <a href={parcel.trackingLink} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800">
+                      {parcel.busId ? (
+                        <a href={`/track/${parcel.busId}`} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:text-primary-800">
                           Track Parcel
                         </a>
                       ) : 'N/A'}

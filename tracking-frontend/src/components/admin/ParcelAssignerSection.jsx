@@ -2,9 +2,9 @@ import React from "react";
 
 const ParcelAssignerSection = ({ title, items, selectedItems, onSelect, search, setSearch, type }) => {
   return (
-    <div className="mb-8">
+    <div className="mb-8 ">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
-      <div className="flex gap-6">
+      <div className="flex gap-6 ">
         <div className="flex-1 max-h-[300px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
           <input
             type="text"

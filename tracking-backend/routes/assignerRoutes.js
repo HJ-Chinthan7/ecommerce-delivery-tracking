@@ -14,5 +14,7 @@ router.get("/regions", authAssigner, assignerContoller.getRegions);
 router.post("/assignParcel", authAssigner, assignerContoller.assignParcel);
 router.post("/reassignParcel", authAssigner, assignerContoller.reassignParcel);
 router.get("/parcels/reassign", authAssigner, assignerContoller.getReassignParcels);
+router.put("/update-address/:id",assignerContoller.updateParcelAdress);
 
+router.get("/parcels/:id",assignerContoller.getParcelById);
 module.exports = router;

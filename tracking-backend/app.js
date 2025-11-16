@@ -11,9 +11,14 @@ const driverRouter=require('./routes/driver');
 const publicTrackingRoutes = require("./routes/tracking");
 const assignerRouter=require('./routes/assignerRoutes');
 connectDb=require("./database/db")
-const appOrigin=process.env.FRONTEND_URL;//"http://localhost:5174";//
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5174",
+  "http://localhost:5000", 
+  'https://ecomm-doit.onrender.com' 
+];;//;//
 app.use(cors({
-  origin: appOrigin,
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],

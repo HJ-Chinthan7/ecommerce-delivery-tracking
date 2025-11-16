@@ -43,7 +43,7 @@ const BusesTab=({
                 <option value="">Select Bus</option>
                 {buses.map((bus) => (
                   <option key={bus._id} value={bus._id}>
-                    Bus {bus.busId} (Route: {bus.routeId?._id })
+                    Bus {bus.busId} (Route: {bus.routeId?._id ||" Not Assigned"})
                   </option>
                 ))}
               </select>
