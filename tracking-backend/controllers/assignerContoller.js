@@ -271,7 +271,7 @@ module.exports.updateParcelAdress = async (req, res) => {
 module.exports.getParcelById = async (req, res) => {
   try {
     const parcelId = req.params.id;
-
+console.log('here',parcelId)
     const parcel = await Parcel.findById(parcelId);
 
     if (!parcel) {
