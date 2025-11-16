@@ -38,8 +38,20 @@ module.exports.loginAssigner = async (req, res) => {
 
 
 module.exports.logoutAssigner = async (req, res) => {
-    res.json({ success: true, message: "Logged out successfully", token: null });
+     res.cookie('token', '', {
+        httpOnly: true,
+        expires: new Date(0), 
+        sameSite: 'Strict',  
+        secure: process.env.NODE_ENV === 'production', 
+    });
+
+    res.json({ 
+        success: true, 
+        message: "Logged out successfully", 
+        token: null 
+    });
 };
+
 
 
 module.exports.getExternalOrders = async (req, res) => {
