@@ -319,7 +319,7 @@ module.exports.removeParcelsRegion = async (req, res) => {
   await Parcel.updateMany(
   { _id: { $in: parcelIds } },
   {
-    $unset: { region: "" },        
+    $unset: { region: null },        
     $set: { status: "pending", busId: null } 
   }
 );
