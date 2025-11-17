@@ -3,3 +3,5 @@
 /dist
 /.env
 /tracking-frontend/dist
+# Local Netlify folder
+.netlify

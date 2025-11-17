@@ -316,11 +316,17 @@ module.exports.removeParcelsRegion = async (req, res) => {
     const { parcelIds } = req.body;
     if (!parcelIds) return res.status(400).json({ message: "parcelIds are required" });
 
-    await Parcel.updateMany(
-      { _id: { $in: parcelIds } },
-      { $unset: { region: "" }, status: "pending" }
-    );
-
+  await Parcel.updateMany(
+  { _id: { $in: parcelIds } },
+  {
+    $unset: { region: "" },        
+    $set: { status: "pending", busId: null } 
+  }
+);
+await Bus.updateMany(
+  { parcels: { $in: validIds } },
+  { $pull: { parcels: { $in: validIds } } }
+);
     res.json({ success: true, message: "Region removed from selected parcels" });
   } catch (error) {
     console.error(error);
