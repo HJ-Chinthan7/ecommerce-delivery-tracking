@@ -324,8 +324,8 @@ module.exports.removeParcelsRegion = async (req, res) => {
   }
 );
 await Bus.updateMany(
-  { parcels: { $in: validIds } },
-  { $pull: { parcels: { $in: validIds } } }
+  { parcels: { $in: parcelIds } },
+  { $pull: { parcels: { $in: parcelIds } } }
 );
     res.json({ success: true, message: "Region removed from selected parcels" });
   } catch (error) {
