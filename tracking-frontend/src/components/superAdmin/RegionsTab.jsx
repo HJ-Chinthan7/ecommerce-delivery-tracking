@@ -1,4 +1,4 @@
-function RegionsTab({ createRegionForm, setCreateRegionForm, handleCreateRegion, regions, loading }) {
+const RegionsTab=({ createRegionForm, setCreateRegionForm, handleCreateRegion, regions, loading })=> {
   return (
     <div className="py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="bg-white rounded-lg shadow p-6">

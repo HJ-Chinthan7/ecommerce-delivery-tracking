@@ -11,7 +11,6 @@ body("password").isLength({min:6}).withMessage("Password must be at least 6 char
 body("role").notEmpty().withMessage("Role is required")
 ],superAdminController.superAdminLogin);
 
-//implement middleware for authentication and authorizationhere for superadmin routes
 router.post("/createregion",authenticateSuperAdmin, superAdminController.createRegion);
 router.put('/approveDriver/:driverId', authenticateSuperAdmin, superAdminController.approveDriver);
 router.post("/createadmin",authenticateSuperAdmin, superAdminController.createAdmin);

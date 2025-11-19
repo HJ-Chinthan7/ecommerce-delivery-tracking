@@ -16,7 +16,7 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5000", 
   'https://ecomm-doit.onrender.com' 
-];;//;//
+];
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

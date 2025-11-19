@@ -1,4 +1,4 @@
-function OverviewTab({ regions, admins, drivers, buses, pendingDrivers, handleApproveDriver }) {
+const OverviewTab=({ regions, admins, drivers, buses, pendingDrivers, handleApproveDriver })=> {
   return (
     <div className="py-8">
     

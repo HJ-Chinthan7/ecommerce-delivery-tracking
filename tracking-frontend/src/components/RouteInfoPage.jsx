@@ -81,7 +81,7 @@ const RouteInfoPage = ({
     if (!withinTime) return;
     try {
       setSendingNotification(true);
-      await driverAPI.sendBusNotification(bus._id, {
+      await driverAPI.sendNotification(bus._id, {
         startTime: selectedStart,
         endTime: selectedEnd,
         routeName: route.name,

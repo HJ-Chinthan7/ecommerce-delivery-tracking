@@ -1,4 +1,4 @@
-function AdminsTab({ createAdminForm, setCreateAdminForm, handleCreateAdmin, admins, regions, loading }) {
+const  AdminsTab=({ createAdminForm, setCreateAdminForm, handleCreateAdmin, admins, regions, loading }) =>{
   return (
     <div className="py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
       

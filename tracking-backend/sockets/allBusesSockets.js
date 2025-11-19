@@ -1,6 +1,4 @@
-
 const buses = require("../memoryStorage");
-
 const allBusesSockets = (io, socket) => {
   socket.on("joinAllBuses", () => {
     socket.join("all_buses");

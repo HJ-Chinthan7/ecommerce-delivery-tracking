@@ -1,4 +1,4 @@
-function DashboardHeader({ admin, onRefresh, onLogout }) {
+const DashboardHeader=({ admin, onRefresh, onLogout })=> {
   return (
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

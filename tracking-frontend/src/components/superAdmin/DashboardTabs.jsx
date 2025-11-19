@@ -6,7 +6,7 @@ const TABS = [
   { id: 'buses', name: 'Manage Buses' }
 ];
 
-function DashboardTabs({ activeTab, setActiveTab }) {
+const DashboardTabs=({ activeTab, setActiveTab })=> {
   return (
     <div className="border-b border-gray-200">
       <nav className="-mb-px flex space-x-8">

@@ -1,5 +1,3 @@
-
-
 const busDriverSockets = (io, socket) => {
   socket.on("busDriverLogin", (data) => {
     const { busId } = data;

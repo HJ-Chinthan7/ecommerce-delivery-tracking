@@ -76,7 +76,7 @@ const BusDriverApp = () => {
             setRoute={setRoute}
           />
         )}
-        {activeTab === "Parcels" && <DeliveriesTable />}
+        {activeTab === "Parcels" && <DeliveriesTable  busId={driver?.bus._id} />}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-function DriversTab({ pendingDrivers, approvedDrivers, handleApproveDriver }) {
+const DriversTab=({ pendingDrivers, approvedDrivers, handleApproveDriver })=> {
   return (
     <div className="py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
      

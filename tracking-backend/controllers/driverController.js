@@ -1,10 +1,14 @@
 const Driver = require("../models/Driver");
-const Bus=require("../models/Bus");
-const generateToken=require("../utils/generateToken")
-const transporter = require("../utils/mailSender");
+const Bus = require("../models/Bus");
+const Parcel = require("../models/Parcel")
+const generateToken = require("../utils/generateToken")
 const { validationResult } = require('express-validator');
-module.exports.driverLogin=async(req,res)=>{
-    try {
+const axios = require("axios");
+const transporter = require('../utils/mailSender')
+const Code = require("../models/Code");
+
+module.exports.driverLogin = async (req, res) => {
+  try {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -22,18 +26,18 @@ module.exports.driverLogin=async(req,res)=>{
 
     const bus = await Bus.findOne({ _id: driver.busId });
     console.log(bus);
-const driverData={ 
-  driverId: driver.driverId,
-  email: driver.email
-}
+    const driverData = {
+      driverId: driver.driverId,
+      email: driver.email
+    }
     const token = generateToken(driverData);
-  
-res.cookie('token',token,   
-   { 
-  httpOnly: true,
-  secure: true,
-  maxAge: 24 * 60 * 60 * 1000,
-});
+
+    res.cookie('token', token,
+      {
+        httpOnly: true,
+        secure: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
     res.json({
       success: true,
       token,
@@ -52,13 +56,13 @@ res.cookie('token',token,
 
 module.exports.driverRegister = async (req, res) => {
   try {
-   
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { driverId, name, email, password, busId, adminId, regionId,status } = req.body;
+    const { driverId, name, email, password, busId, adminId, regionId, status } = req.body;
 
     if (!driverId || !name || !email || !password || !adminId || !regionId) {
       return res.status(400).json({ error: "All required fields must be filled" });
@@ -69,10 +73,10 @@ module.exports.driverRegister = async (req, res) => {
       return res.status(400).json({ error: "Driver already exists" });
     }
 
-   
+
     const hashedPassword = await Driver.hashPassword(password);
 
-   
+
     const driver = new Driver({
       driverId,
       name,
@@ -86,7 +90,7 @@ module.exports.driverRegister = async (req, res) => {
 
     await driver.save();
 
-    let globalbus=null;
+    let globalbus = null;
     if (busId) {
       const bus = await Bus.findById(busId);
       if (!bus) {
@@ -99,7 +103,7 @@ module.exports.driverRegister = async (req, res) => {
 
       bus.driverId = driver._id;
       await bus.save();
-      globalbus=bus;
+      globalbus = bus;
     }
 
     const driverData = { driverId: driver.driverId, email: driver.email, _id: driver._id };
@@ -114,15 +118,15 @@ module.exports.driverRegister = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Driver registered successfully",
-      driver:{
-    driverId: driver.driverId,
-    name: driver.name,
-    email: driver.email,
-    status: driver.status,
-    busId: globalbus?.busId || null,
-    routeId: globalbus?.routeId || null,
-    busStatus: globalbus?.status || null
-  },
+      driver: {
+        driverId: driver.driverId,
+        name: driver.name,
+        email: driver.email,
+        status: driver.status,
+        busId: globalbus?.busId || null,
+        routeId: globalbus?.routeId || null,
+        busStatus: globalbus?.status || null
+      },
     });
   } catch (err) {
     console.error("Driver registration error:", err);
@@ -132,34 +136,34 @@ module.exports.driverRegister = async (req, res) => {
 
 
 module.exports.driverLogout = async (req, res) => {
-    try {
-        const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
-        if (!token) return res.status(400).json({ success: false, message: 'No token found' });
-        res.clearCookie('token');
-        res.json({ success: true, message: 'Logged out successfully' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Server error' });
-    }
+  try {
+    const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) return res.status(400).json({ success: false, message: 'No token found' });
+    res.clearCookie('token');
+    res.json({ success: true, message: 'Logged out successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 
-module.exports.getBusRouteDetails=async (req, res) => {
+module.exports.getBusRouteDetails = async (req, res) => {
   try {
     const { busId } = req.params;
 
     const bus = await Bus.findById(busId)
       .populate({
         path: "regionId",
-        select: "name code", 
+        select: "name code",
       })
       .populate({
         path: "adminId",
-        select: "name email", 
+        select: "name email",
       })
       .populate({
         path: "driverId",
-        select: "name email status", 
+        select: "name email status",
       })
       .populate({
         path: "routeId",
@@ -188,7 +192,7 @@ module.exports.getBusRouteDetails=async (req, res) => {
         routeId: route._id,
         isActive: bus.isActive,
         status: bus.status,
-        direction:bus.direction
+        direction: bus.direction
       },
       route: {
         routeId: route._id,
@@ -227,8 +231,6 @@ module.exports.updateBusStop = async (req, res) => {
       select:
         "routeId name description maxshifts startTimes endTimes busStops regionId isActive createdAt updatedAt",
     });
-    // .populate("parcels");
-
     if (!bus) return res.status(404).json({ message: "Bus not found" });
 
     const route = bus.routeId;
@@ -273,32 +275,7 @@ module.exports.updateBusStop = async (req, res) => {
       { new: true }
     );
 
-    // Notify parcels in next 2 stops
-    /*
-    const nextTwoStops = stops.slice(currentIndex + 1, currentIndex + 3).map((s) => s.stopId);
 
-    const parcelsToNotify = await Parcel.find({
-      busId: bus._id,
-      stopId: { $in: nextTwoStops },
-      attemptDelivery: true,
-    });
-
-    for (const parcel of parcelsToNotify) {
-      // Send email with tracking link
-      const mailOptions = {
-        from: "no-reply@tracking.com",
-        to: parcel.userEmail,
-        subject: "Your parcel is on the way!",
-        text: `Hi, your parcel is approaching. Track it here: ${parcel.trackingLink}`,
-      };
-      transporter.sendMail(mailOptions, (err, info) => {
-        if (err) console.error("Mail error:", err);
-        else console.log("Mail sent:", info.response);
-      });
-    }
-    */
-
-    // Construct response in the format you want
     const data = {
       bus: {
         _id: updatedBus._id,
@@ -310,10 +287,10 @@ module.exports.updateBusStop = async (req, res) => {
           : null,
         driver: updatedBus.driverId
           ? {
-              name: updatedBus.driverId.name,
-              email: updatedBus.driverId.email,
-              status: updatedBus.driverId.status,
-            }
+            name: updatedBus.driverId.name,
+            email: updatedBus.driverId.email,
+            status: updatedBus.driverId.status,
+          }
           : null,
         currentBusStop: updatedBus.currentBusStop,
         nextBusStop: updatedBus.nextBusStop,
@@ -351,5 +328,288 @@ module.exports.updateBusStop = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+module.exports.sendNotification = async (req, res) => {
+  try {
+    const { busId } = req.params;
+
+    if (!busId) {
+      return res.status(400).json({ message: "busId is required" });
+    }
+
+    const parcels = await Parcel.find({ busId });
+    if (!parcels.length) {
+      return res
+        .status(404)
+        .json({ message: "No parcels found for this bus" });
+    }
+
+    const userIds = [...new Set(parcels.map((p) => p.user.toString()))];
+//  http://localhost:5000/
+    const { data } = await axios.post(
+      "https://ecomm-doit.onrender.com/api/users/batch",
+      { userIds }
+    );
+
+    const users = data?.data;
+
+    if (!users || !users.length) {
+      return res
+        .status(404)
+        .json({ message: "No users found for these parcels" });
+    }
+
+    const trackingLink = `https://real-time-trackingofbuses.netlify.app/track/${busId}`;
+
+    await Promise.all(
+      users.map(async (user) => {
+        const mailOptions = {
+          from: "no-reply@tracking.com",
+          to: user.email,
+          subject: "Your parcel is on the way!",
+          text: `Hi ${user.username},\n\nYour parcel's bus is approaching.\nTrack the bus here:\n${trackingLink}\n\nThank you!`,
+        };
+
+        try {
+          const info = await transporter.sendMail(mailOptions);
+        } catch (err) {
+          console.error(`Failed to send mail to ${user.email}:`, err.message);
+        }
+      })
+    );
+
+    await Parcel.updateMany(
+      { busId },
+      { $set: { isDispatched: true } }
+    );
+
+    return res.json({
+      success: true,
+      message: `Notifications sent to ${users.length} users, parcels updated.`,
+      trackingLink,
+    });
+  } catch (err) {
+    console.error("Error in sendNotification:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+module.exports.getBusParcels = async (req, res) => {
+  try {
+    const { busId } = req.params;
+    const parcels = await Parcel.find({
+      busId,
+      status: { $ne: "delivered" },
+      deliveredAt: null,
+    });
+
+    res.json({ success: true, parcels });
+  } catch (err) {
+    console.error("getBusParcels err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+module.exports.getUsersBatch = async (req, res) => {
+  try {
+    const { userIds } = req.body;
+    // http://localhost:5000/
+    const users = await axios.post("https://ecomm-doit.onrender.com/api/users/getParcelUsers", { userIds });
+    res.json({ success: true, data: users.data });
+  } catch (err) {
+    console.error("getUsersBatch err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+module.exports.generateCode = async (req, res) => {
+  try {
+    const { parcelId, parcelIds, busId, type } = req.body;
+    if (!type) return res.status(400).json({ success: false, msg: "type required" });
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const payload = {
+      parcelId: parcelId || null,
+      parcelIds: parcelIds || [],
+      busId: busId || null,
+      type,
+      code,
+      createdAt: new Date(),
+    };
+
+    const saved = await Code.create(payload);
+    if (type === "delivery" && parcelId) {
+      const parcel = await Parcel.findById(parcelId);
+      if (!parcel) {
+        return res.status(404).json({ success: false, msg: "Parcel not found" });
+      }
+      const userId = parcel.user;
+      const usersRes = await axios.post(
+        process.env.USER_SERVICE_URL + "/getParcelUsers",
+        { userIds: [userId] }
+      );
+      const userData = usersRes?.data?.[0];
+      const to = userData?.email || process.env.ADMIN_EMAIL;
+      const subject = "Delivery OTP";
+      const text = `Your delivery OTP: ${code}`;
+      await transporter.sendMail({
+        from: process.env.MAIL_USER,
+        to,
+        subject,
+        text,
+      });
+    } else {
+      // for remove/remove_all/remove_selected -> send to admin correction need to be done hereby  tommorow evening
+      const to = process.env.ADMIN_EMAIL;
+      const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
+      const text = `OTP for action (${type}): ${code}`;
+      await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
+    }
+
+    res.json({ success: true, codeId: saved._id });
+  } catch (err) {
+    console.error("generateCode err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+
+
+module.exports.verifyCode = async (req, res) => {
+  try {
+    const { codeId, code } = req.body;
+    const record = await Code.findById(codeId);
+    if (!record) return res.json({ success: false, msg: "Invalid codeId" });
+    if (record.code !== code) return res.json({ success: false, msg: "Wrong code" });
+
+    if (Date.now() - new Date(record.createdAt).getTime() > 5 * 60 * 1000) {
+      return res.json({ success: false, msg: "Code expired" });
+    }
+
+    res.json({ success: true, record });
+  } catch (err) {
+    console.error("verifyCode err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+
+module.exports.markDelivered = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { parcelId } = req.params;
+    const parcel = await Parcel.findById(parcelId);
+
+    if (!parcel) {
+      return res.status(404).json({ success: false, msg: "Parcel not found" });
+    }
+
+    const item = parcel.items?.[0];
+    const productName = item?.name || "Product";
+    const productPrice = item?.price || 0;
+    const addr = parcel.shippingAddress;
+    const shippingText = `Address:
+${addr.address}, 
+${addr.city}, ${addr.district}, 
+${addr.state}, ${addr.postalCode}, 
+${addr.country}
+`;
+    await Parcel.findByIdAndUpdate(parcelId, {
+      status: "delivered",
+      deliveredAt: new Date(),
+    });
+
+    const to = email;
+    const subject = "Product Delivered Successfully";
+    const text = `
+Your product has been delivered! 
+
+Product: ${productName}
+Price: ₹${productPrice}
+
+Delivery Details:
+${shippingText}
+
+Thank you for ordering with us.
+    `;
+
+
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to,
+      subject,
+      text,
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("markDelivered err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+module.exports.removeParcel = async (req, res) => {
+  try {
+    const { parcelId } = req.params;
+    // optionally checking isAddressChanged logic here if needed is not done yet
+    await Parcel.findByIdAndUpdate(parcelId, { busId: null, status: "unassigned" });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("removeParcel err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+module.exports.removeAllParcels = async (req, res) => {
+  try {
+    const { busId } = req.params;
+    await Parcel.updateMany({ busId }, { $set: { busId: null, status: "unassigned" } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("removeAllParcels err", err);
+    res.status(500).json({ success: false });
+  }
+};
+module.exports.removeSelectedParcels = async (req, res) => {
+  try {
+    const { parcelIds } = req.body;
+    if (!Array.isArray(parcelIds) || parcelIds.length === 0) return res.json({ success: false, msg: "No parcelIds provided" });
+    await Parcel.updateMany({ _id: { $in: parcelIds } }, { $set: { busId: null, status: "unassigned" } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("removeSelectedParcels err", err);
+    res.status(500).json({ success: false });
+  }
+};
+module.exports.notification = async (req, res) => {
+  try {
+    const { busId } = req.params;
+    const parcels = await Parcel.find({ busId }).populate("user");
+    const numbers = parcels.map((p) => p.user?.phone).filter(Boolean);
+    await Notification.sendBulk(numbers, { title: "Bus Arrival", message: "Your parcel is arriving soon." });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("notification err", err);
+    res.status(500).json({ success: false });
+  }
+};
+
+module.exports.notificationSelected = async (req, res) => {
+  try {
+    const { busId } = req.params;
+    const { parcelIds } = req.body;
+    const parcels = await Parcel.find({ _id: { $in: parcelIds } }).populate("user");
+    const numbers = parcels.map((p) => p.user?.phone).filter(Boolean);
+    await Notification.sendBulk(numbers, { title: "Parcel Update", message: "Driver wants to notify you." });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("notificationSelected err", err);
+    res.status(500).json({ success: false });
   }
 };

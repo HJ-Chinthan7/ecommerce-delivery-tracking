@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import AdminPanel from "./components/AdminPanel";
 import BusDriverApp from "./components/BusDriverApp";
 import PublicTracking from "./components/PublicBusTracking";
 import Home from "./components/Home";
@@ -17,7 +16,6 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/login/*" element={
             <AdminAuthProvider>
             <AdminRoutes/>
