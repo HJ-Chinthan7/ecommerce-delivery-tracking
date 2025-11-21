@@ -7,6 +7,7 @@ const axios = require("axios");
 const transporter = require('../utils/mailSender')
 const Code = require("../models/Code");
 const Route = require("../models/Route")
+
 module.exports.driverLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -364,7 +365,7 @@ module.exports.sendNotification = async (req, res) => {
     await Promise.all(
       users.map(async (user) => {
         const mailOptions = {
-          from: "no-reply@tracking.com",
+          from: process.env.FROM_EMAIL,
           to: user.email,
           subject: "Your parcel is on the way!",
           text: `Hi ${user.username},\n\nYour parcel's bus is approaching.\nTrack the bus here:\n${trackingLink}\n\nThank you!`,
@@ -441,7 +442,6 @@ module.exports.generateCode = async (req, res) => {
 
     const saved = await Code.create(payload);
     if (type === "delivery" && parcelId) {
-      console.log("In deliverty")
       const parcel = await Parcel.findById(parcelId);
       if (!parcel) {
         return res.status(404).json({ success: false, msg: "Parcel not found" });
@@ -456,9 +456,8 @@ module.exports.generateCode = async (req, res) => {
       const subject = "Delivery OTP";
       const text = `Your delivery OTP: ${code}`;
       
-      console.log("near mail deliverty")
       await transporter.sendMail({
-        from: process.env.MAIL_USER,
+        from: process.env.FROM_EMAIL,
         to,
         subject,
         text,
@@ -470,14 +469,14 @@ module.exports.generateCode = async (req, res) => {
       const to = bus?.adminId?.email;
       const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
       const text = `OTP for action (${type}): ${code}`;
-      await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
+      await transporter.sendMail({ from: process.env.FROM_EMAIL, to, subject, text });
     }
     else {
       const bus = await Bus.findById(busId).populate("adminId", "email name");
       const to = bus?.adminId?.email;
       const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
       const text = `OTP for action (${type}): ${code}`;
-      await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
+      await transporter.sendMail({ from: process.env.FROM_EMAIL, to, subject, text });
     }
     res.json({ success: true, codeId: saved._id });
   } catch (err) {
@@ -550,7 +549,7 @@ Thank you for ordering with us.
 
 
     await transporter.sendMail({
-      from: process.env.MAIL_USER,
+  from: process.env.FROM_EMAIL,
       to,
       subject,
       text,
@@ -641,7 +640,7 @@ module.exports.notificationSelected = async (req, res) => {
 
     for (const email of emails) {
       await transporter.sendMail({
-        from: process.env.MAIL_USER,
+        from: process.env.FROM_EMAIL,
         to: email,
         subject: "Bus Arrival Notification ",
         text: `Your parcel is arriving soon.   tracking Link = ${trackingLink} `,
@@ -695,7 +694,7 @@ module.exports.notifyWholeBus = async (req, res) => {
 
     for (const email of emails) {
       await transporter.sendMail({
-        from: process.env.MAIL_USER,
+        from: process.env.FROM_EMAIL,
         to: email,
         subject: "Bus Arrival",
         text: `Your parcel is arriving soon.   tracking Link = ${trackingLink} `,

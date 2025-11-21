@@ -12,6 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@sendinblue/client": "^3.3.1",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
