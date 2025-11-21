@@ -6,7 +6,7 @@ const { validationResult } = require('express-validator');
 const axios = require("axios");
 const transporter = require('../utils/mailSender')
 const Code = require("../models/Code");
-const Route=require("../models/Route")
+const Route = require("../models/Route")
 module.exports.driverLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -345,7 +345,7 @@ module.exports.sendNotification = async (req, res) => {
     }
 
     const userIds = [...new Set(parcels.map((p) => p.user.toString()))];
-//  http://localhost:5000/
+    //  http://localhost:5000/
     const { data } = await axios.post(
       "https://ecomm-doit.onrender.com/api/users/batch",
       { userIds }
@@ -460,8 +460,8 @@ module.exports.generateCode = async (req, res) => {
         subject,
         text,
       });
-    } 
-      else if(type==="remove_selected"){
+    }
+    else if (type === "remove_selected") {
       const parcel = await Parcel.findById(parcelIds[0]);
       const bus = await Bus.findById(parcel?.busId).populate("adminId", "email name");
       const to = bus?.adminId?.email;
@@ -469,13 +469,13 @@ module.exports.generateCode = async (req, res) => {
       const text = `OTP for action (${type}): ${code}`;
       await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
     }
-else{
-   const bus = await Bus.findById(busId).populate("adminId", "email name");
+    else {
+      const bus = await Bus.findById(busId).populate("adminId", "email name");
       const to = bus?.adminId?.email;
       const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
       const text = `OTP for action (${type}): ${code}`;
       await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
-}
+    }
     res.json({ success: true, codeId: saved._id });
   } catch (err) {
     console.error("generateCode err", err);
@@ -525,6 +525,12 @@ ${addr.city}, ${addr.district},
 ${addr.state}, ${addr.postalCode}, 
 ${addr.country}
 `;
+
+    await axios.put(
+      "https://ecomm-doit.onrender.com/api/orders/markorder",
+      { orderId: parcel.orderId }
+    );
+
     await Parcel.findByIdAndUpdate(parcelId, {
       status: "delivered",
       deliveredAt: new Date(),
@@ -578,8 +584,8 @@ module.exports.removeAllParcels = async (req, res) => {
     await Parcel.updateMany(
       {
         busId,
-        status: { $ne: "delivered" },   
-        deliveredAt: null               
+        status: { $ne: "delivered" },
+        deliveredAt: null
       },
       {
         $set: {
@@ -599,7 +605,7 @@ module.exports.removeSelectedParcels = async (req, res) => {
   try {
     const { parcelIds } = req.body;
     if (!Array.isArray(parcelIds) || parcelIds.length === 0) return res.json({ success: false, msg: "No parcelIds provided" });
-    await Parcel.updateMany({ _id: { $in: parcelIds } }, { $set: { busId: null, status: "unassigned" ,isDispatched:false} });
+    await Parcel.updateMany({ _id: { $in: parcelIds } }, { $set: { busId: null, status: "unassigned", isDispatched: false } });
     res.json({ success: true });
   } catch (err) {
     console.error("removeSelectedParcels err", err);
@@ -622,7 +628,7 @@ module.exports.notificationSelected = async (req, res) => {
     const userIds = parcels.map(p => p.user);
 
     const usersRes = await axios.post(
-     "https://ecomm-doit.onrender.com/api/users/getParcelUsers", { userIds }
+      "https://ecomm-doit.onrender.com/api/users/getParcelUsers", { userIds }
     );
     const users = usersRes.data || [];
     const emails = users.map(u => u.email).filter(Boolean);
@@ -632,12 +638,12 @@ module.exports.notificationSelected = async (req, res) => {
         message: "No valid emails found for these users"
       });
     }
-    
+
     const trackingLink = `https://real-time-trackingofbuses.netlify.app/track/${busId}`;
 
     for (const email of emails) {
       await transporter.sendMail({
-        from:process.env.MAIL_USER,
+        from: process.env.MAIL_USER,
         to: email,
         subject: "Bus Arrival Notification ",
         text: `Your parcel is arriving soon.   tracking Link = ${trackingLink} `,
@@ -686,7 +692,7 @@ module.exports.notifyWholeBus = async (req, res) => {
         message: "No email IDs found for users on this bus"
       });
     }
-     
+
     const trackingLink = `https://real-time-trackingofbuses.netlify.app/track/${busId}`;
 
     for (const email of emails) {
