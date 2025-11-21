@@ -526,11 +526,6 @@ ${addr.state}, ${addr.postalCode},
 ${addr.country}
 `;
 
-    await axios.put(
-      "https://ecomm-doit.onrender.com/api/orders/markorder",
-      { orderId: parcel.orderId }
-    );
-
     await Parcel.findByIdAndUpdate(parcelId, {
       status: "delivered",
       deliveredAt: new Date(),
