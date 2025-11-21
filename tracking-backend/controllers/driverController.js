@@ -441,6 +441,7 @@ module.exports.generateCode = async (req, res) => {
 
     const saved = await Code.create(payload);
     if (type === "delivery" && parcelId) {
+      console.log("In deliverty")
       const parcel = await Parcel.findById(parcelId);
       if (!parcel) {
         return res.status(404).json({ success: false, msg: "Parcel not found" });
@@ -454,6 +455,8 @@ module.exports.generateCode = async (req, res) => {
       const to = userData?.email || process.env.ADMIN_EMAIL;
       const subject = "Delivery OTP";
       const text = `Your delivery OTP: ${code}`;
+      
+      console.log("near mail deliverty")
       await transporter.sendMail({
         from: process.env.MAIL_USER,
         to,
