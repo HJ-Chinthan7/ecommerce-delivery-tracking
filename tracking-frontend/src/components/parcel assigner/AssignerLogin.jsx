@@ -29,10 +29,8 @@ const AssignerLogin = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-white/20 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       
-      {/* Background Ambient Light */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Home Button (Top Left) */}
       <div className="absolute top-6 left-6 z-20">
         <Link 
           to="/" 
@@ -45,7 +43,7 @@ const AssignerLogin = () => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="text-center">
-          {/* Icon */}
+        
           <div className="mx-auto h-12 w-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-4">
             <ClipboardList className="text-blue-400 h-6 w-6" />
           </div>
@@ -62,7 +60,6 @@ const AssignerLogin = () => {
         <div className="bg-white/[0.02] border border-white/10 backdrop-blur-md py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             
-            {/* Error Message */}
             {message && (
               <div className={cn(
                 "p-3 rounded-lg text-sm border",
