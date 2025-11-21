@@ -455,7 +455,7 @@ module.exports.generateCode = async (req, res) => {
       const to = userData?.email || process.env.ADMIN_EMAIL;
       const subject = "Delivery OTP";
       const text = `Your delivery OTP: ${code}`;
-      
+
       await transporter.sendMail({
         from: process.env.FROM_EMAIL,
         to,
@@ -547,15 +547,16 @@ ${shippingText}
 Thank you for ordering with us.
     `;
 
-if (!parcel.orderId) {
-  console.error("orderId missing for parcel:", parcel._id);
-} else {
-  await axios.put(
-    "https://ecomm-doit.onrender.com/api/orders/markorder",
-    { orderId: parcel.orderId }
-  );
+    if (!parcel.orderId) {
+      console.error("orderId missing for parcel:", parcel._id);
+    } else {
+      await axios.put(
+        "https://ecomm-doit.onrender.com/api/orders/markorder",
+        { orderId: parcel.orderId }
+      );
+    }
     await transporter.sendMail({
-  from: process.env.FROM_EMAIL,
+      from: process.env.FROM_EMAIL,
       to,
       subject,
       text,
