@@ -1,12 +1,12 @@
 const Driver = require("../models/Driver");
 const Bus = require("../models/Bus");
-const Parcel = require("../models/Parcel")
+const Parcel = require("../models/Parcel") //eslint-disable-line
 const generateToken = require("../utils/generateToken")
 const { validationResult } = require('express-validator');
 const axios = require("axios");
 const transporter = require('../utils/mailSender')
 const Code = require("../models/Code");
-
+const Route=require("../models/Route")
 module.exports.driverLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -151,7 +151,6 @@ module.exports.driverLogout = async (req, res) => {
 module.exports.getBusRouteDetails = async (req, res) => {
   try {
     const { busId } = req.params;
-
     const bus = await Bus.findById(busId)
       .populate({
         path: "regionId",
@@ -162,13 +161,13 @@ module.exports.getBusRouteDetails = async (req, res) => {
         select: "name email",
       })
       .populate({
-        path: "driverId",
-        select: "name email status",
-      })
-      .populate({
         path: "routeId",
         select:
           "routeId name description maxshifts startTimes endTimes busStops regionId isActive createdAt updatedAt",
+      })
+      .populate({
+        path: "driverId",
+        select: "name email status",
       });
     if (!bus) return res.status(404).json({ message: "Bus not found" });
     if (!bus.routeId) return res.status(404).json({ message: "Route not assigned" });
@@ -404,7 +403,6 @@ module.exports.getBusParcels = async (req, res) => {
       status: { $ne: "delivered" },
       deliveredAt: null,
     });
-
     res.json({ success: true, parcels });
   } catch (err) {
     console.error("getBusParcels err", err);
@@ -462,14 +460,22 @@ module.exports.generateCode = async (req, res) => {
         subject,
         text,
       });
-    } else {
-      // for remove/remove_all/remove_selected -> send to admin correction need to be done hereby  tommorow evening
-      const to = process.env.ADMIN_EMAIL;
+    } 
+      else if(type==="remove_selected"){
+      const parcel = await Parcel.findById(parcelIds[0]);
+      const bus = await Bus.findById(parcel?.busId).populate("adminId", "email name");
+      const to = bus?.adminId?.email;
       const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
       const text = `OTP for action (${type}): ${code}`;
       await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
     }
-
+else{
+   const bus = await Bus.findById(busId).populate("adminId", "email name");
+      const to = bus?.adminId?.email;
+      const subject = type === "remove" ? "Parcel Remove OTP" : type === "remove_all" ? "Remove All OTP" : "Remove Selected OTP";
+      const text = `OTP for action (${type}): ${code}`;
+      await transporter.sendMail({ from: process.env.MAIL_USER, to, subject, text });
+}
     res.json({ success: true, codeId: saved._id });
   } catch (err) {
     console.error("generateCode err", err);
@@ -569,7 +575,20 @@ module.exports.removeParcel = async (req, res) => {
 module.exports.removeAllParcels = async (req, res) => {
   try {
     const { busId } = req.params;
-    await Parcel.updateMany({ busId }, { $set: { busId: null, status: "unassigned" } });
+    await Parcel.updateMany(
+      {
+        busId,
+        status: { $ne: "delivered" },   
+        deliveredAt: null               
+      },
+      {
+        $set: {
+          busId: null,
+          status: "unassigned",
+          isDispatched: false
+        }
+      }
+    );
     res.json({ success: true });
   } catch (err) {
     console.error("removeAllParcels err", err);
@@ -580,22 +599,10 @@ module.exports.removeSelectedParcels = async (req, res) => {
   try {
     const { parcelIds } = req.body;
     if (!Array.isArray(parcelIds) || parcelIds.length === 0) return res.json({ success: false, msg: "No parcelIds provided" });
-    await Parcel.updateMany({ _id: { $in: parcelIds } }, { $set: { busId: null, status: "unassigned" } });
+    await Parcel.updateMany({ _id: { $in: parcelIds } }, { $set: { busId: null, status: "unassigned" ,isDispatched:false} });
     res.json({ success: true });
   } catch (err) {
     console.error("removeSelectedParcels err", err);
-    res.status(500).json({ success: false });
-  }
-};
-module.exports.notification = async (req, res) => {
-  try {
-    const { busId } = req.params;
-    const parcels = await Parcel.find({ busId }).populate("user");
-    const numbers = parcels.map((p) => p.user?.phone).filter(Boolean);
-    await Notification.sendBulk(numbers, { title: "Bus Arrival", message: "Your parcel is arriving soon." });
-    res.json({ success: true });
-  } catch (err) {
-    console.error("notification err", err);
     res.status(500).json({ success: false });
   }
 };
@@ -603,13 +610,105 @@ module.exports.notification = async (req, res) => {
 module.exports.notificationSelected = async (req, res) => {
   try {
     const { busId } = req.params;
-    const { parcelIds } = req.body;
-    const parcels = await Parcel.find({ _id: { $in: parcelIds } }).populate("user");
-    const numbers = parcels.map((p) => p.user?.phone).filter(Boolean);
-    await Notification.sendBulk(numbers, { title: "Parcel Update", message: "Driver wants to notify you." });
-    res.json({ success: true });
+
+    const parcels = await Parcel.find({ busId });
+
+    if (!parcels.length) {
+      return res.json({
+        success: true,
+        message: "No parcels found for this bus"
+      });
+    }
+    const userIds = parcels.map(p => p.user);
+
+    const usersRes = await axios.post(
+     "https://ecomm-doit.onrender.com/api/users/getParcelUsers", { userIds }
+    );
+    const users = usersRes.data || [];
+    const emails = users.map(u => u.email).filter(Boolean);
+    if (!emails.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid emails found for these users"
+      });
+    }
+    
+    const trackingLink = `https://real-time-trackingofbuses.netlify.app/track/${busId}`;
+
+    for (const email of emails) {
+      await transporter.sendMail({
+        from:process.env.MAIL_USER,
+        to: email,
+        subject: "Bus Arrival Notification ",
+        text: `Your parcel is arriving soon.   tracking Link = ${trackingLink} `,
+      });
+    }
+
+    res.json({
+      success: true,
+      notified: emails.length,
+      message: "Notifications sent to all users on this bus!"
+    });
+
   } catch (err) {
-    console.error("notificationSelected err", err);
-    res.status(500).json({ success: false });
+    console.error("notification err:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Notification failed"
+    });
+  }
+};
+
+module.exports.notifyWholeBus = async (req, res) => {
+  try {
+    const { busId } = req.params;
+
+    const parcels = await Parcel.find({ busId });
+
+    if (!parcels.length) {
+      return res.json({
+        success: true,
+        message: "No parcels found for this bus"
+      });
+    }
+
+    const userIds = parcels.map(p => p.user);
+    const usersRes = await axios.post(
+      "https://ecomm-doit.onrender.com/api/users/getParcelUsers", { userIds }
+    );
+
+    const users = usersRes.data.users || [];
+    const emails = users.map(u => u.email).filter(Boolean);
+
+    if (!emails.length) {
+      return res.status(400).json({
+        success: false,
+        message: "No email IDs found for users on this bus"
+      });
+    }
+     
+    const trackingLink = `https://real-time-trackingofbuses.netlify.app/track/${busId}`;
+
+    for (const email of emails) {
+      await transporter.sendMail({
+        from: process.env.MAIL_USER,
+        to: email,
+        subject: "Bus Arrival",
+        text: `Your parcel is arriving soon.   tracking Link = ${trackingLink} `,
+      });
+    }
+
+    res.json({
+      success: true,
+      notified: emails.length,
+      message: "Notifications sent to all users"
+    });
+
+  } catch (err) {
+    console.error("notifyWholeBus error:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Failed to send notifications"
+    });
   }
 };

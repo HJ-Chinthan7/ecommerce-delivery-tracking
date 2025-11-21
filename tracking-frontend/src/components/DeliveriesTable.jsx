@@ -15,7 +15,6 @@ const DeliveriesTable = ({ busId }) => {
 
   const [verifyModal, setVerifyModal] = useState({ show: false, parcel: null, action: "" ,email:""});
   const [confirmModal, setConfirmModal] = useState({ show: false, title: "", message: "", onConfirm: null });
-
   useEffect(() => {
     if (!busId) return;
     fetchParcels(busId);
@@ -96,11 +95,14 @@ const DeliveriesTable = ({ busId }) => {
       if (searchQuery?.trim()) {
         const parcelIds = filteredParcels.map((p) => p._id);
         const res = await driverParcelsAPI.generateCode({ type: "remove_selected", parcelIds });
-        const codeId = res?.codeId || res?.data?.codeId || (res?.data && res.data.codeId);
+        const codeId =  res?.data?.codeId || (res?.data && res.data.codeId);
+        console.log(codeId)
         setVerifyModal({ show: true, parcel: { parcelIds }, action: "remove_selected", codeId });
       } else {
         const res = await driverParcelsAPI.generateRemoveAllCode(busId);
-        const codeId = res?.codeId || res?.data?.codeId || (res?.data && res.data.codeId);
+        console.log(res);
+         console.log(res.codeId);
+        const codeId =res?.codeId || (res?.data && res.data.codeId);
         setVerifyModal({ show: true, parcel: { }, action: "remove_all", codeId });
       }
     } catch (err) {
@@ -112,7 +114,7 @@ const DeliveriesTable = ({ busId }) => {
   const handleVerifyCode = async (code) => {
     try {
       const { parcel, action, codeId ,email} = verifyModal;
-      const res = await driverParcelsAPI.verifyCode({ codeId: parcel?.codeId||codeId , code });
+      const res = await driverParcelsAPI.verifyCode({ codeId: codeId||parcel?.codeId , code });
       if (!res?.data?.success) {
         return { ok: false, msg:res?.data?.msg || "Invalid code." };
       }
@@ -123,7 +125,7 @@ const DeliveriesTable = ({ busId }) => {
         await driverParcelsAPI.removeParcel(parcel._id);
         await fetchParcels(busId);
       } else if (action === "remove_selected") {
-        const parcelIds = parcel?.parcelIds || verifyModal.parcelIds || [];
+        const parcelIds = parcel?.parcelIds || verifyModal.parcel || [];
         await driverParcelsAPI.removeSelectedParcels({ parcelIds });
         await fetchParcels(busId);
       } else if (action === "remove_all") {
@@ -162,6 +164,8 @@ const DeliveriesTable = ({ busId }) => {
   };
 
   const handleSendNotification = async (targetParcels) => {
+    console.log(targetParcels);
+    
     try {
       if (Array.isArray(targetParcels) && targetParcels.length) {
         const ids = targetParcels.map((p) => p._id);

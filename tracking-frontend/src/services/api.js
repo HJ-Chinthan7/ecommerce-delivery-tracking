@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_APP_BASE_URL|| 'http://localhost:5002/api';//;// 
+const API_BASE_URL = 'http://localhost:5002/api';//;// import.meta.env.VITE_APP_BASE_URL||
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -93,7 +93,7 @@ export const driverParcelsAPI = {
   getBusParcels: (busId) => api.get(`/driver/parcels/${busId}`),
   getUsersBatch: (userIds) => api.post(`/driver/users/batch`, { userIds }),
 
-  markDelivered: (parcelId,email) => api.patch(`/driver/mark-delivered/${parcelId}`,{email}),
+  markDelivered: (parcelId, email) => api.patch(`/driver/mark-delivered/${parcelId}`, { email }),
   generateDeliveryCode: async (parcelId) => {
     const res = await api.post(`/driver/generate-code`, { parcelId, type: "delivery" });
     return res.data;
@@ -104,11 +104,16 @@ export const driverParcelsAPI = {
   },
 
 
-  // Generic generate/verify endpoints (backend)  needs to checked by tommorw
+  notifyWholeBus: (busId) => api.post(`/driver/notification/${busId}`),
+  notifySelectedParcels: (busId, parcelIds) =>
+    api.post(`/driver/notification-selected/${busId}`, { parcelIds }),
   generateCode: (payload) => api.post(`/driver/generate-code`, payload),
   verifyCode: (payload) => api.post(`/driver/verify-code`, payload),
 
+  removeSelectedParcels: (payload) => api.patch(`/driver/remove-selected`, payload),
 
+  removeAllParcels: (busId) => api.patch(`/driver/remove-all/${busId}`),
+  
   generateRemoveCode: async (parcelId) => {
     const res = await api.post(`/driver/generate-code`, { parcelId, type: "remove" });
     return res.data;
@@ -126,18 +131,9 @@ export const driverParcelsAPI = {
     const res = await api.post(`/driver/verify-code`, { codeId, code });
     return res.data;
   },
-//this routes are not verified as of now verifying by tomorow
-  // Remove endpoints 
+
+ //extra route
   removeParcel: (parcelId) => api.patch(`/driver/remove-parcel/${parcelId}`),
-  removeAllParcels: (busId) => api.patch(`/driver/remove-all/${busId}`),
-
-  // Remove selected (frontend sends parcelIds)
-  removeSelectedParcels: (payload) => api.patch(`/driver/remove-selected`, payload),
-  // payload: { parcelIds } - PATCH
 
 
-  // notifications
-  notifyWholeBus: (busId) => api.post(`/driver/notification/${busId}`),
-  notifySelectedParcels: (busId, parcelIds) =>
-    api.post(`/driver/notification-selected/${busId}`, { parcelIds }),
 };

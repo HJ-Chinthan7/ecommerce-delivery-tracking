@@ -65,7 +65,7 @@ const BusDriverApp = () => {
         )}
         {activeTab === "Route List" && (
           <RouteInfoPage
-            busId={driver?.bus._id}
+            busId={driver?.bus?._id}
             selectedEnd={selectedEnd}
             selectedStart={selectedStart}
             setSelectedEnd={setSelectedEnd}
@@ -76,7 +76,7 @@ const BusDriverApp = () => {
             setRoute={setRoute}
           />
         )}
-        {activeTab === "Parcels" && <DeliveriesTable  busId={driver?.bus._id} />}
+        {activeTab === "Parcels" && <DeliveriesTable  busId={driver?.bus?._id} />}
       </div>
     </div>
   );

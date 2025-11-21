@@ -151,13 +151,13 @@ module.exports.getRegionBuses = async (req, res) => {
 module.exports.getRegionParcels=async (req, res) => {
   try {
     const regionId = req.user.regionId;
-
+console.log("here");
    const parcels = await Parcel.find({ region:regionId });
     res.json({
       success: true,
      parcels,
     });
-
+console.log(parcels);
   } catch (error) {
     console.error("Get region parcels error:", error);
     res.status(500).json({ error: "Internal server error" });
