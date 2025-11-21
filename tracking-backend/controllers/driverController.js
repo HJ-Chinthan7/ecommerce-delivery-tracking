@@ -547,7 +547,13 @@ ${shippingText}
 Thank you for ordering with us.
     `;
 
-
+if (!parcel.orderId) {
+  console.error("orderId missing for parcel:", parcel._id);
+} else {
+  await axios.put(
+    "https://ecomm-doit.onrender.com/api/orders/markorder",
+    { orderId: parcel.orderId }
+  );
     await transporter.sendMail({
   from: process.env.FROM_EMAIL,
       to,
