@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const SuperAdmin = require("../models/SuperAdmin");
 const Admin = require("../models/Admin");
 const Bus = require('../models/Bus');
-const Driver=require("../models/Driver")
+const Driver = require("../models/Driver")
 const Region = require("../models/Region");
 const generateSuperAdminToken = require('../utils/generateSAToken');
 module.exports.superAdminLogin = async (req, res) => {
@@ -73,16 +73,16 @@ module.exports.createRegion = async (req, res) => {
     if (existingRegion) {
       return res.status(400).json({ success: false, error: "Region name or code already exists" });
     }
-const superAdmin=await SuperAdmin.findOne({email:superAdminEmail}).select('_id');
+    const superAdmin = await SuperAdmin.findOne({ email: superAdminEmail }).select('_id');
 
-if(!superAdmin){
-res.status(400).json({success:false,error:"super admin error"});
-}
+    if (!superAdmin) {
+      res.status(400).json({ success: false, error: "super admin error" });
+    }
 
     const newRegion = new Region({
       name,
       code,
-      superadminId:superAdmin._id
+      superadminId: superAdmin._id
     });
 
     await newRegion.save();
@@ -145,7 +145,7 @@ module.exports.createBus = async (req, res) => {
 
     const bus = new Bus({
       busId,
-      routeId:null,
+      routeId: null,
       regionId,
       adminId,
       driverId: null,
@@ -174,8 +174,8 @@ module.exports.createBus = async (req, res) => {
 
 module.exports.getAllAdmins = async (req, res) => {
   try {
-    const admins = await Admin.find().select('-password').populate('regionId','name code');
-    res.json({ success: true,  admins });
+    const admins = await Admin.find().select('-password').populate('regionId', 'name code');
+    res.json({ success: true, admins });
   } catch (error) {
     console.error("Error fetching admins:", error);
     res.status(500).json({ success: false, error: "Server error" });
@@ -185,7 +185,7 @@ module.exports.getAllAdmins = async (req, res) => {
 module.exports.getAllRegions = async (req, res) => {
   try {
     const regions = await Region.find().select("-superadminId");
-    res.status(200).json({success:true,regions});
+    res.status(200).json({ success: true, regions });
   } catch (error) {
     console.error("Error fetching regions:", error);
     res.status(500).json({ success: false, error: "Server error" });
@@ -194,7 +194,11 @@ module.exports.getAllRegions = async (req, res) => {
 
 module.exports.superAdminLogout = async (req, res) => {
   try {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+    });
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     console.error("Error during logout:", error);
@@ -203,20 +207,20 @@ module.exports.superAdminLogout = async (req, res) => {
 };
 
 module.exports.getAllBuses = async (req, res) => {
-  try{
-    const buses=await Bus.find().populate('regionId','name code').populate('adminId','name email').populate('driverId','name email');
-    res.json({success:true,buses});
-  }catch(error){
+  try {
+    const buses = await Bus.find().populate('regionId', 'name code').populate('adminId', 'name email').populate('driverId', 'name email');
+    res.json({ success: true, buses });
+  } catch (error) {
     res.status(500).json({ success: false, error: "Server error" });
   }
 };
 
-module.exports.getAllDrivers=async(req,res)=>{
-  try{
-    const drivers=await Driver.find().populate('regionId','name code').populate('adminId','name email').populate('busId','busId');
-    res.json({success:true,drivers});
-  }catch(error){
-res.status(500).json({success:false,error:"Server error" });
+module.exports.getAllDrivers = async (req, res) => {
+  try {
+    const drivers = await Driver.find().populate('regionId', 'name code').populate('adminId', 'name email').populate('busId', 'busId');
+    res.json({ success: true, drivers });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Server error" });
   }
 };
 

@@ -140,7 +140,11 @@ module.exports.driverLogout = async (req, res) => {
   try {
     const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
     if (!token) return res.status(400).json({ success: false, message: 'No token found' });
-    res.clearCookie('token');
+   res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: process.env.NODE_ENV === 'production',
+});
     res.json({ success: true, message: 'Logged out successfully' });
   } catch (err) {
     console.error(err);
