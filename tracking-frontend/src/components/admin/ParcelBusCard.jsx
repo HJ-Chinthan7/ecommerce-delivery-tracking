@@ -19,7 +19,9 @@ return (
          </h4>
          {selected && <CheckCircle2 size={14} className="text-green-500" />}
       </div>
-      
+        <p className="text-xs text-zinc-500 line-clamp-1 mb-2">
+         {bus?.busId}
+      </p>
       <p className="text-xs text-zinc-500 line-clamp-1 mb-2">
          {bus?.routeId?.description || "No route description"}
       </p>

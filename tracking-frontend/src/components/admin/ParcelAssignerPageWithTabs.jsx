@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ParcelCard from './ParcelCard'
 import BusAssignerSection from './BusAssignerSection'
-import TabsContainer from '../TabsContainer'
 import { adminAPI } from "../../services/api";
 import { useLocation } from "react-router-dom";
+import Tabs from "./Tabs";
 import { 
   Search, 
   Box, 
@@ -12,6 +12,7 @@ import {
   Unplug
 } from 'lucide-react';
  import { useNavigate } from 'react-router-dom';
+import TabItem from "./TabItem";
 const ParcelAssignerPageWithTabs = () => {
   const navigate=useNavigate();
   const location = useLocation();
@@ -135,11 +136,11 @@ return (
         </div>
       </div>
 
-      <TabsContainer
+      <Tabs
         tabs={[
-          { id: "assign", name: "Assign Parcels" },
-          { id: "unassign", name: "Unassign Parcels" },
-          { id: "region", name: "Remove Region" },
+          { id: "assign", name: "Assign Parcels", icon: Box },
+          { id: "unassign", name: "Unassign Parcels", icon: Unplug },
+          { id: "region", name: "Remove Region", icon: AlertTriangle },
         ]}
       >
         {(activeTab) => {
@@ -293,7 +294,7 @@ return (
               return null;
           }
         }}
-      </TabsContainer>
+      </Tabs>
     </div>
   );
 };
