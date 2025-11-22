@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext/BusAuthContext";
 import BusDriverLogin from "./BusDriverLogin";
 import Navbar from "./Navbar";
-import Tabs from "./Tabs";
 import BusMap from "./BusMap";
 import DeliveriesTable from "./DeliveriesTable";
 import RouteInfoPage from "./RouteInfoPage";
