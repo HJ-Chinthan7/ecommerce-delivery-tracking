@@ -11,7 +11,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useAuth } from "../AuthContext/BusAuthContext";
 import socketService from "../services/socket";
-
+import { MapPin, Navigation, Activity, Play, Square, Eye, EyeOff, RefreshCw, LocateFixed } from 'lucide-react';
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -124,13 +124,15 @@ const BusMap = ({ tracking, setTracking, showAll, setShowAll, bus, route }) => {
 
   const center = busLocation || [12.9716, 77.5946];
 
-  return (
-    <div className="h-[100vh] md:h-[76vh] flex flex-col md:flex-row">
-      <div className="flex-1 ">
+return (
+    <div className="flex flex-col lg:flex-row h-full gap-6 w-full">
+      
+  
+      <div className="relative w-full h-[50vh] lg:h-auto lg:flex-1 rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-zinc-900 order-1 [&_.leaflet-tile-pane]:filter [&_.leaflet-tile-pane]:invert-[1] [&_.leaflet-tile-pane]:brightness-[0.6] [&_.leaflet-tile-pane]:hue-rotate-[180deg] [&_.leaflet-tile-pane]:grayscale-[0.8]">
         <MapContainer
           center={center}
           zoom={18}
-          className="h-full w-full"
+          className="h-full w-full z-0 bg-zinc-900" 
           ref={mapRef}
         >
           <TileLayer
@@ -138,104 +140,134 @@ const BusMap = ({ tracking, setTracking, showAll, setShowAll, bus, route }) => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {(!showAll || Object.entries(allBuses).length == 0) &&
+          {(!showAll || Object.entries(allBuses).length === 0) &&
             busLocation && (
               <FlyMarker position={busLocation} icon={busIcon}>
-                <Popup>
-                  Bus id:{bus?.busId||"N/A"}
-                  <br />
-                  current stop : {bus?.currentBusStop?.name||"N/A"}
-                  <br />
-                  next stop : {bus?.nextBusStop?.name||"N/A"}
-                  <br />
-                  Route name : {bus?.RouteName||"N/A"}
-                  <br />
+                <Popup className="custom-popup-dark">
+                  <div className="text-sm font-sans min-w-[150px]">
+                    <p className="font-bold text-zinc-900 mb-1">Bus: {bus?.busId || "N/A"}</p>
+                    <div className="text-xs text-zinc-600 space-y-0.5">
+                      <p>Route: {bus?.RouteName || "N/A"}</p>
+                      <p>Stop: {bus?.currentBusStop?.name || "N/A"}</p>
+                      <p>Next: {bus?.nextBusStop?.name || "N/A"}</p>
+                    </div>
+                  </div>
                 </Popup>
               </FlyMarker>
             )}
+            
           {showAll &&
             Object.entries(allBuses).map(([busId, pos]) => (
               <Marker key={busId} position={[pos.lat, pos.lon]} icon={busIcon}>
-                <Popup>
-                  {/* Bus id:{bus?.busId} */}
-                  <br />
-                  {/* current stop : {bus?.currentBusStop?.name}
-                  <br />
-                  next stop : {bus?.nextBusStop?.name}
-                  <br />
-                  Route name : {bus?.RouteName} */}
-                  <br />
-                  Last update: {new Date(pos.timestamp).toLocaleTimeString()}
+                <Popup className="custom-popup-dark">
+                   <div className="text-sm font-sans">
+                      <p className="font-bold text-zinc-900">Bus Network</p>
+                      <p className="text-xs text-zinc-600 mt-1">
+                        Updated: {new Date(pos.timestamp).toLocaleTimeString()}
+                      </p>
+                   </div>
                 </Popup>
               </Marker>
             ))}
         </MapContainer>
+
+        <div className="absolute top-4 right-4 z-[400] pointer-events-none">
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border backdrop-blur-md shadow-lg ${
+            tracking 
+              ? "bg-green-500/90 border-green-400 text-white" 
+              : "bg-black/70 border-white/10 text-zinc-400"
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${tracking ? 'bg-white animate-pulse' : 'bg-zinc-500'}`} />
+            <span className="text-xs font-medium font-mono">
+              {tracking ? "LIVE TRACKING" : "OFFLINE"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="w-full md:w-1/3 bg-white p-4 overflow-y-auto max-h-[90vh]">
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Location Status</h2>
+      <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0 order-2 pb-20 lg:pb-0">
+        
+        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-lg">
+          <div className="flex items-center gap-2 mb-4 pb-4 border-b border-white/5">
+            <Activity className={tracking ? "text-green-400" : "text-zinc-500"} size={18} />
+            <h2 className="text-base font-medium text-white">System Status</h2>
+          </div>
+          
           {busLocation || location ? (
             <div className="space-y-4">
-              <div className="flex justify-between">
-                <span>Current Location:</span>
-                {busLocation && (
-                  <span className="mr-5">
-                    {busLocation[0]?.toFixed(2) || busLocation?.lat?.toFixed(2)}{" "}
-                    ,
-                    {busLocation[1]?.toFixed(2) || busLocation?.lat?.toFixed(2)}
+              <div className="bg-black/40 rounded-xl p-3 border border-white/5">
+                <div className="flex items-center justify-between text-xs text-zinc-500 mb-1">
+                  <span className="flex items-center gap-1"><LocateFixed size={12}/> Coordinates</span>
+                  <span className="font-mono text-zinc-300">
+                    {busLocation 
+                      ? `${busLocation[0]?.toFixed(4)}, ${busLocation[1]?.toFixed(4)}` 
+                      : (busLocation?.lat ? `${busLocation.lat.toFixed(4)}, ...` : "Waiting...")}
                   </span>
-                )}
+                </div>
+                <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden mt-2">
+                   <div className={`h-full w-full rounded-full ${tracking ? 'bg-green-500 animate-[shimmer_2s_infinite]' : 'bg-zinc-700'}`} />
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Tracking Status:</span>
-                <span
-                  className={
-                    tracking ? "text-green-600 font-medium" : "text-gray-600"
-                  }
-                >
-                  {tracking ? "Active" : "Inactive"}
-                </span>
-              </div>
-              <div className="space-y-2 pt-2">
+
+              <div className="pt-2">
                 {!tracking ? (
                   <button
                     onClick={handleStart}
-                    className="bg-green-600 text-white py-2 px-4 rounded-lg w-full"
+                    className="w-full group relative overflow-hidden bg-green-600 hover:bg-green-500 text-white font-medium py-3 px-4 rounded-xl transition-all shadow-lg shadow-green-900/20 flex items-center justify-center gap-2"
                   >
-                    Start Tracking
+                    <Play size={18} fill="currentColor" />
+                    <span>Start Journey</span>
                   </button>
                 ) : (
                   <button
                     onClick={handleStop}
-                    className="bg-red-600 text-white py-2 px-4 rounded-lg w-full"
+                    className="w-full group bg-red-500/10 hover:bg-red-500/20 border border-red-500/50 text-red-400 hover:text-red-300 font-medium py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
                   >
-                    Stop Tracking
+                    <Square size={18} fill="currentColor" />
+                    <span>Stop Tracking</span>
                   </button>
                 )}
               </div>
             </div>
           ) : (
-            <div>
-              <p className="text-gray-500">Location not available</p>
+            <div className="text-center py-4">
+              <Navigation className="mx-auto text-zinc-600 mb-2 animate-bounce" size={24} />
+              <p className="text-zinc-500 text-sm mb-4">GPS Signal Lost</p>
               <button
                 onClick={handleStart}
-                className="bg-green-600 text-white py-2 px-4 rounded-lg w-full"
+                className="w-full bg-white text-black font-medium py-2.5 rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
               >
-                Refresh
+                <RefreshCw size={16} />
+                <span>Reconnect GPS</span>
               </button>
             </div>
           )}
         </div>
 
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Map Options</h2>
+        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-5 backdrop-blur-sm shadow-lg flex-1 h-fit">
+          <div className="flex items-center gap-2 mb-4">
+            <MapPin className="text-blue-400" size={18} />
+            <h2 className="text-base font-medium text-white">View Options</h2>
+          </div>
+          
           <button
             onClick={() => setShowAll((prev) => !prev)}
-            className="bg-blue-600 text-white py-2 px-4 rounded-lg w-full"
+            className={`w-full py-3 px-4 rounded-xl font-medium transition-all border flex items-center justify-between group ${
+              showAll 
+                ? "bg-blue-500/10 border-blue-500/50 text-blue-300" 
+                : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
+            }`}
           >
-            {showAll ? "Show My Bus Only" : "Show All Buses"}
+            <span className="flex items-center gap-2">
+              {showAll ? <Eye size={18} /> : <EyeOff size={18} />}
+              {showAll ? "All Bus View" : " My Bus"}
+            </span>
+            <div className={`w-2 h-2 rounded-full ${showAll ? "bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]" : "bg-zinc-600"}`} />
           </button>
+          
+          <p className="text-[10px] text-zinc-600 mt-4 text-center leading-relaxed">
+            Toggle to see other buses on the route network or focus solely on your current path.
+          </p>
         </div>
       </div>
     </div>

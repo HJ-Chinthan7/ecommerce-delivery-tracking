@@ -23,7 +23,7 @@ import {
   AlertCircle, 
   CheckCircle2 
 } from 'lucide-react';
-import TabItem from "../../utils/TabItem";
+import TabItem from "./TabItem";
 import { cn } from "../../utils/util";    //eslint-disable-line
 const AdminDashboard = () => {
   const { admin, logout } = useAdminAuth();

@@ -4,7 +4,6 @@ import ParcelList from "./ParcelList";
 import VerifyModal from "./VerifyModal";
 import ConfirmModal from "./ConfirmModal";
 import { driverParcelsAPI } from "../services/api";
-
 const DeliveriesTable = ({ busId }) => {
   const [parcels, setParcels] = useState([]);
   const [selectedParcel, setSelectedParcel] = useState(null);
@@ -180,9 +179,10 @@ const DeliveriesTable = ({ busId }) => {
     }
   };
 
-  return (
-    <div className="w-full flex gap-3">
-      <div className="w-2/3">
+ return (
+    <div className="h-full flex flex-col lg:flex-row gap-6">
+      
+      <div className="w-full lg:w-2/3 h-full">
         <ParcelList
           parcels={filteredParcels}
           users={users}
@@ -196,7 +196,7 @@ const DeliveriesTable = ({ busId }) => {
         />
       </div>
 
-      <div className="w-1/3">
+      <div className="w-full lg:w-1/3 h-full">
         <RightPanel
           parcels={filteredParcels}
           onSearch={setSearchQuery}

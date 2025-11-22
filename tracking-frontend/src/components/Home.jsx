@@ -111,7 +111,7 @@ const Home = () => {
                 </h1>
 
                 <p className="text-lg text-zinc-400 mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                  Monitor and manage parcels efficiently using our advanced bus-based delivery system.
+                  Monitor and manage parcels efficiently using our public bus-based delivery system model.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">

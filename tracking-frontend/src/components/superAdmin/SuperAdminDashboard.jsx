@@ -12,7 +12,7 @@ import BusesTab from "./BusesTab";
 import { motion, AnimatePresence } from "framer-motion";   //eslint-disable-line
 import { clsx } from "clsx";   //eslint-disable-line
 import { twMerge } from "tailwind-merge";   //eslint-disable-line
-import TabItem from "../../utils/TabItem";
+import TabItem from "../admin/TabItem";
 import {
   LayoutDashboard,
   ShieldCheck,

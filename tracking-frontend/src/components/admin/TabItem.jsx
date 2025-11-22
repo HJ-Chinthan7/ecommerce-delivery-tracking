@@ -1,4 +1,4 @@
-import { cn } from "./util";
+import { cn } from "../../utils/util";
 import { motion, AnimatePresence } from "framer-motion";//eslint-disable-line
 const TabItem = ({ id, label, icon: Icon, activeTab, setActiveTab }) => (//eslint-disable-line
   <button

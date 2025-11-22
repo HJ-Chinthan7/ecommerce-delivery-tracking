@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ParcelCard from './ParcelCard'
 import BusAssignerSection from './BusAssignerSection'
-import TabsContainer from './TabsContainer'
+import TabsContainer from '../TabsContainer'
 import { adminAPI } from "../../services/api";
 import { useLocation } from "react-router-dom";
 import { 
