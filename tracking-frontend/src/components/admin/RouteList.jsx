@@ -1,12 +1,17 @@
 import RouteCard from "./RouteCard";
-
+import {  Map } from "lucide-react";
 const RouteList = ({ routes, loadRoutes, setMessage }) => {
-  if (!routes || routes.length === 0)
-    return <p className="text-gray-500">No routes available</p>;
+  if (!routes || routes.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-zinc-500 min-h-[200px]">
+        <Map size={48} strokeWidth={1} className="opacity-50 mb-4" />
+        <p className="text-sm">No active routes found.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-h-96 overflow-y-auto border p-4 rounded shadow bg-white space-y-4">
-      <h3 className="font-semibold text-lg mb-2">All Routes</h3>
+    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
       {routes.map((route) => (
         <RouteCard
           key={route._id}

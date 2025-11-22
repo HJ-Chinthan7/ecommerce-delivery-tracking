@@ -4,6 +4,14 @@ import BusCard from "./BusCard";
 import RouteCardMini from "./RouteCardMini";
 import SearchBar from "./SearchBar";
 import AssignForm from "./AssignForm";
+import { 
+  Bus, 
+  Route as RouteIcon, 
+  CheckCircle2, 
+  AlertCircle, 
+  Navigation, 
+} from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 
 const AssignRoute = () => {
   const [buses, setBuses] = useState([]);
@@ -60,61 +68,103 @@ const AssignRoute = () => {
       )
     );
   };
-  return (
-    <div className="p-6 space-y-6 min-h-screen overflow-y-auto bg-gray-50">
-    
-      {message && (
-        <div className="bg-green-100 text-green-800 p-2 rounded shadow-sm sticky top-0 z-10">
-          {message}
-        </div>
-      )}
+return (
+    <div className="p-4 md:p-6 space-y-6 h-full flex flex-col min-h-[80vh]">
+      
+      <AnimatePresence mode="wait">
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`p-3 rounded-xl border backdrop-blur-md flex items-center gap-3 sticky top-0 z-20 shadow-lg ${
+              message.toLowerCase().includes('error')
+                ? "bg-red-500/10 border-red-500/20 text-red-200" 
+                : "bg-green-500/10 border-green-500/20 text-green-200"
+            }`}
+          >
+            {message.toLowerCase().includes('error') ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+            <span className="text-sm font-medium">{message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+        <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col shadow-xl shadow-black/20">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <Bus className="text-blue-400" size={20} />
+              <h3 className="font-medium text-white">Region Buses</h3>
+            </div>
+            <span className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">
+              {filteredBuses.length}
+            </span>
+          </div>
+          
+          <div className="mb-4">
+            <SearchBar
+              placeholder="Search ID or Driver..."
+              handleChange={handleBusSearch} 
+            />
+          </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
-     
-        <div className="flex-1 border rounded p-4 bg-white shadow-sm">
-          <h3 className="font-semibold text-lg mb-2 text-blue-700">Buses</h3>
-          <SearchBar
-            placeholder="Search bus by ID or driver name"
-            onSearch={handleBusSearch}
-          />
-          <div className="mt-3 space-y-3 max-h-[65vh] overflow-y-auto pr-2">
-            {filteredBuses.map((bus) => (
-              <BusCard key={bus._id} bus={bus} setMessage={setMessage} refreshData={() => {
-          loadBuses();
-          loadRoutes();
-        }}  />
-            ))}
-            {filteredBuses.length === 0 && (
-              <p className="text-gray-400 text-center">No buses found.</p>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            {filteredBuses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-32 text-zinc-600">
+                <Bus size={32} strokeWidth={1} className="opacity-50 mb-2" />
+                <p className="text-sm">No buses found.</p>
+              </div>
+            ) : (
+              filteredBuses.map((bus) => (
+                <BusCard 
+                  key={bus._id} 
+                  bus={bus} 
+                  setMessage={setMessage} 
+                  refreshData={() => { loadBuses(); loadRoutes(); }} 
+                />
+              ))
             )}
           </div>
         </div>
+        <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col shadow-xl shadow-black/20">
+          <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+             <div className="flex items-center gap-2">
+              <RouteIcon className="text-green-400" size={20} />
+              <h3 className="font-medium text-white">Available Routes</h3>
+            </div>
+            <span className="text-xs font-mono text-zinc-500 bg-white/5 px-2 py-1 rounded">
+              {filteredRoutes.length}
+            </span>
+          </div>
 
-        <div className="flex-1 border rounded p-4 bg-white shadow-sm">
-          <h3 className="font-semibold text-lg mb-2 text-green-700">Routes</h3>
-          <SearchBar
-            placeholder="Search route by name or ID"
-            onSearch={handleRouteSearch}
-          />
-          <div className="mt-3 space-y-3 max-h-[65vh] overflow-y-auto pr-2">
-            {filteredRoutes.map((route) => (
-              <RouteCardMini key={route._id} route={route} />
-            ))}
-            {filteredRoutes.length === 0 && (
-              <p className="text-gray-400 text-center">No routes found.</p>
+          <div className="mb-4">
+            <SearchBar
+              placeholder="Search Route Name..."
+              handleChange={handleRouteSearch} 
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            {filteredRoutes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-32 text-zinc-600">
+                <Navigation size={32} strokeWidth={1} className="opacity-50 mb-2" />
+                <p className="text-sm">No routes found.</p>
+              </div>
+            ) : (
+              filteredRoutes.map((route) => (
+                <RouteCardMini key={route._id} route={route} />
+              ))
             )}
           </div>
         </div>
       </div>
-      <AssignForm
-        buses={buses}
-        routes={routes}
-        setMessage={setMessage}
-        refreshData={() => {
-          loadBuses();
-          loadRoutes();
-        }}
-      />
+      <div className="mt-auto pt-2">
+        <AssignForm
+          buses={buses}
+          routes={routes}
+          setMessage={setMessage}
+          refreshData={() => { loadBuses(); loadRoutes(); }}
+        />
+      </div>
     </div>
   );
 };

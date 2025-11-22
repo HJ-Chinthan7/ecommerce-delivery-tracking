@@ -21,7 +21,7 @@ const ParcelCube = () => {
     { type: 'face-right', icon: <MapPin size={40} className="text-green-400" />, label: "Track" },
     { type: 'face-left', icon: <ClipboardList size={40} className="text-blue-400" />, label: "Assign" },
     { type: 'face-top', icon: <Box size={40} className="text-white/50" />, label: "Parcel" },
-    { type: 'face-bottom', icon: <Box size={40} className="text-white/50" />, label: "System" },
+    { type: 'face-bottom', icon: <Box size={40} className="text-white/50" />, label: "System Admin" },
   ];
 
   return (

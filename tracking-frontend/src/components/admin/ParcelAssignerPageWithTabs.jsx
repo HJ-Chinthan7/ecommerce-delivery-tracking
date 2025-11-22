@@ -4,9 +4,16 @@ import BusAssignerSection from './BusAssignerSection'
 import TabsContainer from './TabsContainer'
 import { adminAPI } from "../../services/api";
 import { useLocation } from "react-router-dom";
-
+import { 
+  Search, 
+  Box, 
+  AlertTriangle, 
+  ArrowLeft, 
+  Unplug
+} from 'lucide-react';
+ import { useNavigate } from 'react-router-dom';
 const ParcelAssignerPageWithTabs = () => {
-  
+  const navigate=useNavigate();
   const location = useLocation();
   const regionId = location.state?.regionId;
   const [unassignedParcels, setUnassignedParcels] = useState([]);
@@ -110,109 +117,184 @@ const ParcelAssignerPageWithTabs = () => {
     return name.includes(search) || desc.includes(search);
   });
 
-  return (
-    <TabsContainer
-      tabs={[
-        { id: "assign", name: "Assign Parcels" },
-        { id: "unassign", name: "Unassign Parcels" },
-        { id: "region", name: "Remove Region" },
-      ]}
-    >
-      {(activeTab) => {
-        switch (activeTab) {
-          case "assign":
-            return (
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-6">
-                  <div className="flex-1 max-h-[500px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Search parcels..."
-                      value={parcelSearch}
-                      onChange={(e) => setParcelSearch(e.target.value)}
-                      className="w-full mb-2 px-3 py-1 rounded-lg border"
+return (
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30 p-6">
+      
+      <div className="max-w-7xl mx-auto flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/admin/login/admin-dashboard')} 
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border border-white/5"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-xl font-serif font-medium tracking-tight"> Parcel Assigner To Bus</h1>
+            <p className="text-xs text-zinc-500 font-mono">Manage logistics & distribution</p>
+          </div>
+        </div>
+      </div>
+
+      <TabsContainer
+        tabs={[
+          { id: "assign", name: "Assign Parcels" },
+          { id: "unassign", name: "Unassign Parcels" },
+          { id: "region", name: "Remove Region" },
+        ]}
+      >
+        {(activeTab) => {
+          switch (activeTab) {
+            case "assign":
+              return (
+                <div className="flex flex-col gap-6 h-[700px]">
+                  <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+                    
+                    <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col shadow-lg shadow-black/20">
+                      <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+                        <h3 className="font-medium text-white flex items-center gap-2">
+                          <Box size={18} className="text-blue-400" />
+                          Available Parcels
+                        </h3>
+                        <span className="text-xs font-mono text-zinc-500">{filteredParcels.length} items</span>
+                      </div>
+                      
+                      <div className="relative group mb-3">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                        <input
+                          type="text"
+                          placeholder="Search Parcel ID..."
+                          value={parcelSearch}
+                          onChange={(e) => setParcelSearch(e.target.value)}
+                          className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
+                        />
+                      </div>
+
+                      <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                        {filteredParcels.length === 0 ? (
+                           <p className="text-zinc-600 text-center text-sm mt-10">No parcels found.</p>
+                        ) : (
+                          filteredParcels.map((p) => (
+                            <ParcelCard
+                              key={p._id}
+                              parcel={p}
+                              selected={selectedParcels.includes(p._id)}
+                              onSelect={toggleSelect}
+                              type="assign"
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <BusAssignerSection
+                      buses={filteredBuses}
+                      selectedBus={selectedBus}
+                      onSelectBus={setSelectedBus}
+                      search={busSearch}
+                      setSearch={setBusSearch}
                     />
-                    {filteredParcels.map((p) => (
-                      <ParcelCard
-                        key={p._id}
-                        parcel={p}
-                        selected={selectedParcels.includes(p._id)}
-                        onSelect={toggleSelect}
-                        type="assign"
-                      />
-                    ))}
                   </div>
-                  <BusAssignerSection
-                    buses={filteredBuses}
-                    selectedBus={selectedBus}
-                    onSelectBus={setSelectedBus}
-                    search={busSearch}
-                    setSearch={setBusSearch}
-                  />
+                  <button
+                    onClick={assignBus}
+                    disabled={selectedParcels.length === 0 || !selectedBus}
+                    className={`w-full py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
+                      selectedParcels.length > 0 && selectedBus
+                        ? "bg-blue-600 text-white hover:bg-blue-500 hover:shadow-blue-500/20"
+                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Assign {selectedParcels.length} Parcels
+                  </button>
                 </div>
-                <button
-                  onClick={assignBus}
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
-                >
-                  Assign Selected Parcels
-                </button>
-              </div>
-            );
+              );
 
-          case "unassign":
-            return (
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-6">
-                  <div className="flex-1 max-h-[300px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
-                    {(assignedParcels || []).map((p) => (
-                      <ParcelCard
-                        key={p._id}
-                        parcel={p}
-                        selected={selectedUnassignParcels.includes(p._id)}
-                        onSelect={toggleSelect}
-                        type="unassign"
-                      />
-                    ))}
+            case "unassign":
+              return (
+                <div className="flex flex-col gap-6 h-[710px]">
+                  <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col">
+                     <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+                        <h3 className="font-medium text-white flex items-center gap-2">
+                          <Unplug size={18} className="text-red-400" />
+                          Assigned Parcels
+                        </h3>
+                        <span className="text-xs font-mono text-zinc-500">{(assignedParcels || []).length} active</span>
+                     </div>
+                     
+                     <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                      {(assignedParcels || []).length === 0 ? (
+                          <p className="text-zinc-600 text-center text-sm mt-10">No assigned parcels found.</p>
+                      ) : (
+                        (assignedParcels || []).map((p) => (
+                          <ParcelCard
+                            key={p._id}
+                            parcel={p}
+                            selected={selectedUnassignParcels.includes(p._id)}
+                            onSelect={toggleSelect}
+                            type="unassign"
+                          />
+                        ))
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={unassignBus}
+                    disabled={selectedUnassignParcels.length === 0}
+                    className={`w-full py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
+                      selectedUnassignParcels.length > 0
+                        ? "bg-red-600 text-white hover:bg-red-500 hover:shadow-red-500/20"
+                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Unassign {selectedUnassignParcels.length} Parcels
+                  </button>
                 </div>
-                <button
-                  onClick={unassignBus}
-                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg"
-                >
-                  Unassign Selected Parcels
-                </button>
-              </div>
-            );
+              );
 
-          case "region":
-            return (
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-6">
-                  <div className="flex-1 max-h-[300px] overflow-y-auto bg-gray-100 p-4 rounded-2xl space-y-2">
-                    {(addressChangedParcels || []).map((p) => (
-                      <ParcelCard
-                        key={p._id}
-                        parcel={p}
-                        selected={selectedRegionParcels.includes(p._id)}
-                        onSelect={toggleSelect}
-                        type="region"
-                      />
-                    ))}
+            case "region":
+              return (
+                <div className="flex flex-col gap-6 h-[600px]">
+                  <div className="flex-1 bg-white/[0.02] border border-white/10 rounded-2xl p-4 flex flex-col">
+                     <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+                        <h3 className="font-medium text-white flex items-center gap-2">
+                          <AlertTriangle size={18} className="text-yellow-500" />
+                          Parcels with Address Changes
+                        </h3>
+                     </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                      {(addressChangedParcels || []).length === 0 ? (
+                          <p className="text-zinc-600 text-center text-sm mt-10">No parcels require region removal.</p>
+                      ) : (
+                          (addressChangedParcels || []).map((p) => (
+                          <ParcelCard
+                              key={p._id}
+                              parcel={p}
+                              selected={selectedRegionParcels.includes(p._id)}
+                              onSelect={toggleSelect}
+                              type="region"
+                          />
+                          ))
+                      )}
+                    </div>
                   </div>
+                  <button
+                    onClick={removeRegion}
+                    disabled={selectedRegionParcels.length === 0}
+                    className={`w-full py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
+                       selectedRegionParcels.length > 0
+                        ? "bg-orange-600 text-white hover:bg-orange-500 hover:shadow-orange-500/20"
+                        : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Remove Region ({selectedRegionParcels.length})
+                  </button>
                 </div>
-                <button
-                  onClick={removeRegion}
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg"
-                >
-                  Remove Region from Selected Parcels
-                </button>
-              </div>
-            );
-          default:
-            return null;
-        }
-      }}
-    </TabsContainer>
+              );
+            default:
+              return null;
+          }
+        }}
+      </TabsContainer>
+    </div>
   );
 };
 
