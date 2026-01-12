@@ -80,7 +80,7 @@ const DeliveriesTable = ({ busId }) => {
   };
   const openRemoveFlow = async (parcel) => {
     try {
-      const res = await driverParcelsAPI.generateRemoveCode(parcel._id);
+      const res = await driverParcelsAPI.generateRemoveCode(parcel);
       const codeId = res?.codeId || res?.data?.codeId || (res?.data && res.data.codeId);
       setVerifyModal({ show: true, parcel: { ...parcel, codeId }, action: "remove" });
     } catch (err) {

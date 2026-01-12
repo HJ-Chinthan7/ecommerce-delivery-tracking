@@ -115,7 +115,7 @@ export const driverParcelsAPI = {
   removeAllParcels: (busId) => api.patch(`/driver/remove-all/${busId}`),
   
   generateRemoveCode: async (parcelId) => {
-    const res = await api.post(`/driver/generate-code`, { parcelId, type: "remove" });
+    const res = await api.post(`/driver/generate-code`, { parcelId:parcelId._id, type: "remove",busId:parcelId.busId });
     return res.data;
   },
   verifyRemoveCode: async (codeId, code) => {
