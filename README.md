@@ -10,6 +10,7 @@
 7. [Socket Events](#socket-events)
 8. [Authentication & Security](#authentication--security)
 9. [Deployment](#deployment)
+10. [Demo Account/Login Password ](#Demo--Account/Login--Password)
 
 ---
 
@@ -1229,10 +1230,12 @@ Testing of all api backend routes useing postman
 - Check browser console for errors
 - Ensure Socket.IO connection is active
 
+
+## Demo Account/Login Password
+
+
+
 ---
 
 
 
-**Documentation Version:** 1.0
-**Last Updated:** January 10, 2026
-**Created for:** E-Commerce Delivery Tracking System
